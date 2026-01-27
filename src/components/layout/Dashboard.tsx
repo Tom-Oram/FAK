@@ -9,6 +9,7 @@ import {
   Gauge,
   ArrowRight,
   Zap,
+  Regex,
 } from 'lucide-react'
 import SystemHealthBar from './SystemHealthBar'
 import RecentActivity from './RecentActivity'
@@ -61,6 +62,14 @@ const tools = [
     icon: Terminal,
     subtitle: 'Multi-platform • Visual builder',
     color: 'from-pink-500 to-pink-600',
+  },
+  {
+    name: 'Regex Builder',
+    description: 'Build regular expressions by selecting patterns from sample text.',
+    href: '/regex-builder',
+    icon: Regex,
+    subtitle: 'Pattern detection • Multi-language',
+    color: 'from-violet-500 to-violet-600',
   },
 ]
 

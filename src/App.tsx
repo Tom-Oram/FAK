@@ -7,6 +7,7 @@ import {
   PathTracer,
   CaptureBuilder,
   IperfServer,
+  RegexBuilder,
 } from './components/tools'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path="path-tracer" element={<PathTracer />} />
         <Route path="capture-builder" element={<CaptureBuilder />} />
         <Route path="iperf-server" element={<IperfServer />} />
+        <Route path="regex-builder" element={<RegexBuilder />} />
       </Route>
     </Routes>
   )
