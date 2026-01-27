@@ -12,8 +12,18 @@ interface ConfigPanelProps {
 export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true)
 
+  // Ensure config has all required properties with defaults
+  const safeConfig: ServerConfig = {
+    port: config?.port ?? 5201,
+    bindAddress: config?.bindAddress ?? '0.0.0.0',
+    protocol: config?.protocol ?? 'tcp',
+    oneOff: config?.oneOff ?? false,
+    idleTimeout: config?.idleTimeout ?? 300,
+    allowlist: config?.allowlist ?? [],
+  }
+
   const updateConfig = (updates: Partial<ServerConfig>) => {
-    onChange({ ...config, ...updates })
+    onChange({ ...safeConfig, ...updates })
   }
 
   return (
@@ -40,7 +50,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
               </label>
               <input
                 type="number"
-                value={config.port}
+                value={safeConfig.port}
                 onChange={(e) => updateConfig({ port: parseInt(e.target.value) || 5201 })}
                 disabled={disabled}
                 min={1}
@@ -54,7 +64,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
               </label>
               <input
                 type="text"
-                value={config.bindAddress}
+                value={safeConfig.bindAddress}
                 onChange={(e) => updateConfig({ bindAddress: e.target.value })}
                 disabled={disabled}
                 placeholder="0.0.0.0"
@@ -74,7 +84,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
                   type="radio"
                   name="protocol"
                   value="tcp"
-                  checked={config.protocol === 'tcp'}
+                  checked={safeConfig.protocol === 'tcp'}
                   onChange={() => updateConfig({ protocol: 'tcp' as Protocol })}
                   disabled={disabled}
                   className="text-primary-600"
@@ -86,7 +96,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
                   type="radio"
                   name="protocol"
                   value="udp"
-                  checked={config.protocol === 'udp'}
+                  checked={safeConfig.protocol === 'udp'}
                   onChange={() => updateConfig({ protocol: 'udp' as Protocol })}
                   disabled={disabled}
                   className="text-primary-600"
@@ -102,7 +112,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={config.oneOff}
+                  checked={safeConfig.oneOff}
                   onChange={(e) => updateConfig({ oneOff: e.target.checked })}
                   disabled={disabled}
                   className="text-primary-600 rounded"
@@ -119,7 +129,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
               </label>
               <input
                 type="number"
-                value={config.idleTimeout}
+                value={safeConfig.idleTimeout}
                 onChange={(e) =>
                   updateConfig({ idleTimeout: parseInt(e.target.value) || 0 })
                 }
@@ -137,7 +147,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
               Allowed Clients (IP/CIDR)
             </label>
             <textarea
-              value={config.allowlist.join('\n')}
+              value={safeConfig.allowlist.join('\n')}
               onChange={(e) =>
                 updateConfig({
                   allowlist: e.target.value
