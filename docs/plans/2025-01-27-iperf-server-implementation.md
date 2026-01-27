@@ -3176,3 +3176,17 @@ git commit -m "fix(iperf): integration fixes from testing"
 - TestHistory with filtering and export
 - Main component integration
 - Final testing
+
+---
+
+## Implementation Progress
+
+All tasks completed on 2026-01-27.
+
+**Notes:**
+- The system may have an iperf3 systemd service running on port 5201. If the iPerf Server fails to start on the default port, either:
+  1. Stop the system service: `sudo systemctl stop iperf3`
+  2. Use a different port (e.g., 5210) in the UI configuration
+- Docker deployment requires the system to have Docker and Docker Compose installed
+- For development, run backend (`go run ./cmd/server`) and frontend (`npm run dev`) separately
+- In production (Docker), use `docker compose up --build`
