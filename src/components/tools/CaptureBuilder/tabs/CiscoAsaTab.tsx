@@ -172,21 +172,21 @@ export default function CiscoAsaTab() {
         <div className="card-body space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Capture Name *</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Capture Name *</label>
               <input
                 type="text"
                 value={options.captureName}
                 onChange={(e) => updateOption('captureName', e.target.value)}
                 placeholder="capture1"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Interface *</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Interface *</label>
               <select
                 value={options.interface}
                 onChange={(e) => updateOption('interface', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               >
                 {ASA_INTERFACES.map((iface) => (
                   <option key={iface.value} value={iface.value}>
@@ -201,16 +201,16 @@ export default function CiscoAsaTab() {
                   value={options.customInterface}
                   onChange={(e) => updateOption('customInterface', e.target.value)}
                   placeholder="Enter interface name"
-                  className="mt-2 w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="mt-2 w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                 />
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Capture Type</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Capture Type</label>
               <select
                 value={options.captureType}
                 onChange={(e) => updateOption('captureType', e.target.value as CiscoAsaOptions['captureType'])}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               >
                 <option value="raw-data">raw-data (default)</option>
                 <option value="asp-drop">asp-drop (dropped packets)</option>
@@ -219,11 +219,11 @@ export default function CiscoAsaTab() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Direction</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Direction</label>
               <select
                 value={options.direction}
                 onChange={(e) => updateOption('direction', e.target.value as CiscoAsaOptions['direction'])}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               >
                 <option value="both">Both</option>
                 <option value="ingress">Ingress only</option>
@@ -241,25 +241,25 @@ export default function CiscoAsaTab() {
         </div>
         <div className="card-body space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Access List (if pre-defined)</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Access List (if pre-defined)</label>
             <input
               type="text"
               value={options.accessList}
               onChange={(e) => updateOption('accessList', e.target.value)}
               placeholder="ACL-CAPTURE"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
             />
-            <p className="text-xs text-slate-500 mt-1">Leave blank to use inline match below</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Leave blank to use inline match below</p>
           </div>
 
           {!options.accessList && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Protocol</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Protocol</label>
                 <select
                   value={options.protocol}
                   onChange={(e) => updateOption('protocol', e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                 >
                   {PROTOCOLS.map((p) => (
                     <option key={p.value} value={p.value}>
@@ -269,12 +269,12 @@ export default function CiscoAsaTab() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Port</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Port</label>
                 <div className="flex gap-2">
                   <select
                     value={options.portOperator}
                     onChange={(e) => updateOption('portOperator', e.target.value)}
-                    className="px-3 py-2 border border-slate-300 rounded-lg"
+                    className="px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                   >
                     <option value="eq">eq</option>
                     <option value="gt">gt</option>
@@ -286,28 +286,28 @@ export default function CiscoAsaTab() {
                     value={options.port}
                     onChange={(e) => updateOption('port', e.target.value)}
                     placeholder="443"
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg"
+                    className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Source IP</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Source IP</label>
                 <input
                   type="text"
                   value={options.sourceIp}
                   onChange={(e) => updateOption('sourceIp', e.target.value)}
                   placeholder="10.0.0.1"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Destination IP</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Destination IP</label>
                 <input
                   type="text"
                   value={options.destIp}
                   onChange={(e) => updateOption('destIp', e.target.value)}
                   placeholder="10.0.0.2"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                 />
               </div>
             </div>
@@ -323,23 +323,23 @@ export default function CiscoAsaTab() {
         <div className="card-body">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Buffer Size (bytes)</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Buffer Size (bytes)</label>
               <input
                 type="number"
                 value={options.bufferSize}
                 onChange={(e) => updateOption('bufferSize', e.target.value)}
                 placeholder="512000"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Packet Length</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Packet Length</label>
               <input
                 type="number"
                 value={options.packetLength}
                 onChange={(e) => updateOption('packetLength', e.target.value)}
                 placeholder="1518"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               />
             </div>
             <div className="flex items-end">
@@ -350,7 +350,7 @@ export default function CiscoAsaTab() {
                   onChange={(e) => updateOption('circularBuffer', e.target.checked)}
                   className="rounded border-slate-300"
                 />
-                <span className="text-sm text-slate-700">Circular buffer</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">Circular buffer</span>
               </label>
             </div>
           </div>
@@ -371,7 +371,7 @@ export default function CiscoAsaTab() {
                 onChange={(e) => updateOption('includeShowCapture', e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="text-sm text-slate-700">show capture</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">show capture</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -380,7 +380,7 @@ export default function CiscoAsaTab() {
                 onChange={(e) => updateOption('includeShowConn', e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="text-sm text-slate-700">show conn</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">show conn</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -389,18 +389,18 @@ export default function CiscoAsaTab() {
                 onChange={(e) => updateOption('includePacketTracer', e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="text-sm text-slate-700">packet-tracer</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">packet-tracer</span>
             </label>
           </div>
 
           {options.includePacketTracer && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Protocol</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Protocol</label>
                 <select
                   value={options.packetTracerProtocol}
                   onChange={(e) => updateOption('packetTracerProtocol', e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                 >
                   <option value="tcp">TCP</option>
                   <option value="udp">UDP</option>
@@ -408,43 +408,43 @@ export default function CiscoAsaTab() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Source IP</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Source IP</label>
                 <input
                   type="text"
                   value={options.packetTracerSourceIp}
                   onChange={(e) => updateOption('packetTracerSourceIp', e.target.value)}
                   placeholder="10.0.0.1"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Source Port</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Source Port</label>
                 <input
                   type="number"
                   value={options.packetTracerSourcePort}
                   onChange={(e) => updateOption('packetTracerSourcePort', e.target.value)}
                   placeholder="12345"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Destination IP</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Destination IP</label>
                 <input
                   type="text"
                   value={options.packetTracerDestIp}
                   onChange={(e) => updateOption('packetTracerDestIp', e.target.value)}
                   placeholder="10.0.0.2"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Destination Port</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Destination Port</label>
                 <input
                   type="number"
                   value={options.packetTracerDestPort}
                   onChange={(e) => updateOption('packetTracerDestPort', e.target.value)}
                   placeholder="443"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                 />
               </div>
             </div>

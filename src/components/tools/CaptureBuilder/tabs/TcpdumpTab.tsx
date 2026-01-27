@@ -20,10 +20,10 @@ function CollapsibleSection({ title, summary, defaultOpen = true, children }: Co
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border border-slate-200 rounded-lg">
+    <div className="border border-slate-200 dark:border-slate-700 rounded-lg">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
       >
         <div className="flex items-center gap-2">
           {isOpen ? (
@@ -33,7 +33,7 @@ function CollapsibleSection({ title, summary, defaultOpen = true, children }: Co
           )}
           <span className="font-medium text-slate-900 dark:text-white">{title}</span>
         </div>
-        {!isOpen && summary && <span className="text-sm text-slate-500">{summary}</span>}
+        {!isOpen && summary && <span className="text-sm text-slate-500 dark:text-slate-400">{summary}</span>}
       </button>
       {isOpen && <div className="px-4 pb-4 space-y-4">{children}</div>}
     </div>
@@ -271,7 +271,7 @@ export default function TcpdumpTab() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Interface</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Interface</label>
             <select
               value={options.interface}
               onChange={(e) => updateOption('interface', e.target.value)}
@@ -295,7 +295,7 @@ export default function TcpdumpTab() {
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Packet Count (-c)</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Packet Count (-c)</label>
             <input
               type="number"
               value={options.packetCount}
@@ -305,7 +305,7 @@ export default function TcpdumpTab() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Snaplen (-s)</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Snaplen (-s)</label>
             <input
               type="number"
               value={options.snaplen}
@@ -313,7 +313,7 @@ export default function TcpdumpTab() {
               placeholder="262144 (default)"
               className="w-full px-3 py-2 border border-slate-300 rounded-lg"
             />
-            <p className="text-xs text-slate-500 mt-1">0 = capture full packets</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">0 = capture full packets</p>
           </div>
           <div className="flex flex-col justify-end gap-2">
             <label className="flex items-center gap-2">
@@ -323,7 +323,7 @@ export default function TcpdumpTab() {
                 onChange={(e) => updateOption('noResolveHosts', e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="text-sm text-slate-700">Don't resolve hostnames (-n)</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Don't resolve hostnames (-n)</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -332,7 +332,7 @@ export default function TcpdumpTab() {
                 onChange={(e) => updateOption('noResolvePorts', e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="text-sm text-slate-700">Don't resolve ports (-nn)</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Don't resolve ports (-nn)</span>
             </label>
           </div>
         </div>
@@ -344,7 +344,7 @@ export default function TcpdumpTab() {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Verbosity</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Verbosity</label>
             <div className="flex flex-wrap gap-2">
               {(['', '-v', '-vv', '-vvv'] as const).map((v) => (
                 <button
@@ -353,7 +353,7 @@ export default function TcpdumpTab() {
                   className={`px-3 py-1.5 text-sm rounded-lg border ${
                     options.verbosity === v
                       ? 'bg-primary-600 text-white border-primary-600'
-                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
                 >
                   {v || 'Normal'}
@@ -362,7 +362,7 @@ export default function TcpdumpTab() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Hex Output</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Hex Output</label>
             <div className="flex flex-wrap gap-2">
               {(['', '-x', '-X', '-xx', '-XX'] as const).map((h) => (
                 <button
@@ -371,7 +371,7 @@ export default function TcpdumpTab() {
                   className={`px-3 py-1.5 text-sm rounded-lg border ${
                     options.hexOutput === h
                       ? 'bg-primary-600 text-white border-primary-600'
-                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
                 >
                   {h || 'None'}
@@ -387,7 +387,7 @@ export default function TcpdumpTab() {
                 onChange={(e) => updateOption('lineBuffered', e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="text-sm text-slate-700">Line buffered (-l)</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Line buffered (-l)</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -396,7 +396,7 @@ export default function TcpdumpTab() {
                 onChange={(e) => updateOption('printWhileWriting', e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="text-sm text-slate-700">Print while writing (-U)</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Print while writing (-U)</span>
             </label>
           </div>
         </div>
@@ -421,7 +421,7 @@ export default function TcpdumpTab() {
               className={`px-3 py-1.5 text-sm rounded-lg border ${
                 options.timestamp === ts.value
                   ? 'bg-primary-600 text-white border-primary-600'
-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
               {ts.label}
@@ -437,7 +437,7 @@ export default function TcpdumpTab() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Write to file (-w)</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Write to file (-w)</label>
             <input
               type="text"
               value={options.writeFile}
@@ -447,7 +447,7 @@ export default function TcpdumpTab() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Read from file (-r)</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Read from file (-r)</label>
             <input
               type="text"
               value={options.readFile}
@@ -458,8 +458,8 @@ export default function TcpdumpTab() {
           </div>
         </div>
         {options.writeFile && (
-          <div className="mt-4 pt-4 border-t border-slate-200">
-            <h4 className="text-sm font-medium text-slate-700 mb-3">File Rotation</h4>
+          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">File Rotation</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm text-slate-600 mb-1">Size MB (-C)</label>

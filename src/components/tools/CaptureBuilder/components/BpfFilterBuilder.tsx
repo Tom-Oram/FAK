@@ -184,7 +184,7 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-slate-700">BPF Filter</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">BPF Filter</label>
         <button
           onClick={toggleRawMode}
           className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
@@ -209,11 +209,11 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
             value={localRaw}
             onChange={(e) => handleRawChange(e.target.value)}
             placeholder="e.g., tcp port 443 and host 192.168.1.1"
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg font-mono text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             rows={2}
           />
           {!value.isValid && value.parseError && (
-            <p className="mt-1 text-xs text-danger-600">{value.parseError}</p>
+            <p className="mt-1 text-xs text-danger-600 dark:text-danger-400">{value.parseError}</p>
           )}
         </div>
       ) : (
@@ -225,14 +225,14 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                   <select
                     value={value.operators[index - 1] || 'and'}
                     onChange={(e) => updateOperator(index - 1, e.target.value as FilterOperator)}
-                    className="px-2 py-1 text-xs border border-slate-300 rounded bg-slate-50 font-medium"
+                    className="px-2 py-1 text-xs border border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-700 dark:text-slate-100 font-medium"
                   >
                     <option value="and">AND</option>
                     <option value="or">OR</option>
                   </select>
                 </div>
               )}
-              <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+              <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg">
                 <input
                   type="checkbox"
                   checked={condition.enabled}
@@ -242,7 +242,7 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                 <select
                   value={condition.not ? 'not' : ''}
                   onChange={(e) => updateCondition(condition.id, { not: e.target.value === 'not' })}
-                  className="px-2 py-1 text-sm border border-slate-300 rounded"
+                  className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 dark:text-slate-100"
                 >
                   <option value="">—</option>
                   <option value="not">NOT</option>
@@ -252,7 +252,7 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                   onChange={(e) =>
                     updateCondition(condition.id, { type: e.target.value as FilterConditionType })
                   }
-                  className="px-2 py-1 text-sm border border-slate-300 rounded"
+                  className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 dark:text-slate-100"
                 >
                   {CONDITION_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -265,7 +265,7 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                   <select
                     value={condition.protocol || ''}
                     onChange={(e) => updateCondition(condition.id, { protocol: e.target.value })}
-                    className="px-2 py-1 text-sm border border-slate-300 rounded flex-1"
+                    className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded flex-1 bg-white dark:bg-slate-700 dark:text-slate-100"
                   >
                     <option value="">Select...</option>
                     {PROTOCOLS.filter((p) => p.value).map((p) => (
@@ -283,7 +283,7 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                       onChange={(e) =>
                         updateCondition(condition.id, { direction: e.target.value as FilterDirection })
                       }
-                      className="px-2 py-1 text-sm border border-slate-300 rounded"
+                      className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 dark:text-slate-100"
                     >
                       {DIRECTIONS.map((d) => (
                         <option key={d.value} value={d.value}>
@@ -300,7 +300,7 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                         })
                       }
                       placeholder={condition.type === 'host' ? '192.168.1.1' : '192.168.1.0/24'}
-                      className="px-2 py-1 text-sm border border-slate-300 rounded flex-1"
+                      className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded flex-1 bg-white dark:bg-slate-700 dark:text-slate-100"
                     />
                   </>
                 )}
@@ -312,7 +312,7 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                       onChange={(e) =>
                         updateCondition(condition.id, { direction: e.target.value as FilterDirection })
                       }
-                      className="px-2 py-1 text-sm border border-slate-300 rounded"
+                      className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 dark:text-slate-100"
                     >
                       {DIRECTIONS.map((d) => (
                         <option key={d.value} value={d.value}>
@@ -327,7 +327,7 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                         updateCondition(condition.id, { port: parseInt(e.target.value) || undefined })
                       }
                       placeholder="443"
-                      className="px-2 py-1 text-sm border border-slate-300 rounded w-24"
+                      className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded w-24 bg-white dark:bg-slate-700 dark:text-slate-100"
                     />
                   </>
                 )}
@@ -339,7 +339,7 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                       onChange={(e) =>
                         updateCondition(condition.id, { direction: e.target.value as FilterDirection })
                       }
-                      className="px-2 py-1 text-sm border border-slate-300 rounded"
+                      className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 dark:text-slate-100"
                     >
                       {DIRECTIONS.map((d) => (
                         <option key={d.value} value={d.value}>
@@ -354,9 +354,9 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                         updateCondition(condition.id, { port: parseInt(e.target.value) || undefined })
                       }
                       placeholder="80"
-                      className="px-2 py-1 text-sm border border-slate-300 rounded w-20"
+                      className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded w-20 bg-white dark:bg-slate-700 dark:text-slate-100"
                     />
-                    <span className="text-slate-500">-</span>
+                    <span className="text-slate-500 dark:text-slate-400">-</span>
                     <input
                       type="number"
                       value={condition.portEnd || ''}
@@ -364,7 +364,7 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
                         updateCondition(condition.id, { portEnd: parseInt(e.target.value) || undefined })
                       }
                       placeholder="443"
-                      className="px-2 py-1 text-sm border border-slate-300 rounded w-20"
+                      className="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded w-20 bg-white dark:bg-slate-700 dark:text-slate-100"
                     />
                   </>
                 )}
@@ -390,8 +390,8 @@ export default function BpfFilterBuilder({ value, onChange }: BpfFilterBuilderPr
       )}
 
       {filterString && (
-        <div className="p-2 bg-slate-100 rounded font-mono text-sm text-slate-700">
-          Filter: <span className="text-primary-600">{filterString}</span>
+        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded font-mono text-sm text-slate-700 dark:text-slate-300">
+          Filter: <span className="text-primary-600 dark:text-primary-400">{filterString}</span>
         </div>
       )}
     </div>

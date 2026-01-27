@@ -24,19 +24,21 @@ function getApiUrls() {
   const protocol = window.location.protocol
   const host = window.location.host
   const wsProtocol = protocol === 'https:' ? 'wss:' : 'ws:'
+  const port = window.location.port
 
-  // Check if running behind nginx (production)
-  if (window.location.port === '' || window.location.port === '80' || window.location.port === '443') {
+  // Development mode (Vite dev server) - connect directly to backend
+  const devPorts = ['5173', '5174', '5175', '5176', '3000']
+  if (devPorts.includes(port)) {
     return {
-      wsUrl: `${wsProtocol}//${host}/iperf/ws`,
-      apiUrl: `${protocol}//${host}/iperf`,
+      wsUrl: 'ws://localhost:8080/ws',
+      apiUrl: 'http://localhost:8080',
     }
   }
 
-  // Development mode - connect directly to backend
+  // Production or Docker mode - use nginx proxy paths
   return {
-    wsUrl: 'ws://localhost:8080/ws',
-    apiUrl: 'http://localhost:8080',
+    wsUrl: `${wsProtocol}//${host}/iperf/ws`,
+    apiUrl: `${protocol}//${host}/iperf`,
   }
 }
 

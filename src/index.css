@@ -26,7 +26,7 @@
 
   .btn-secondary {
     @apply btn bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus:ring-primary-500;
-    @apply dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700;
+    @apply dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600 dark:hover:bg-slate-600;
   }
 
   .btn-danger {

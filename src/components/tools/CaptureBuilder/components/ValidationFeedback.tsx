@@ -16,19 +16,19 @@ export default function ValidationFeedback({ messages }: ValidationFeedbackProps
       {errors.map((msg, i) => (
         <div
           key={`error-${i}`}
-          className="flex items-start gap-2 p-2 bg-danger-50 border border-danger-200 rounded-lg"
+          className="flex items-start gap-2 p-2 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-lg"
         >
-          <AlertCircle className="w-4 h-4 text-danger-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-danger-800">{msg.message}</p>
+          <AlertCircle className="w-4 h-4 text-danger-600 dark:text-danger-400 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-danger-800 dark:text-danger-300">{msg.message}</p>
         </div>
       ))}
       {warnings.map((msg, i) => (
         <div
           key={`warning-${i}`}
-          className="flex items-start gap-2 p-2 bg-warning-50 border border-warning-200 rounded-lg"
+          className="flex items-start gap-2 p-2 bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg"
         >
-          <AlertTriangle className="w-4 h-4 text-warning-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-warning-800">{msg.message}</p>
+          <AlertTriangle className="w-4 h-4 text-warning-600 dark:text-warning-400 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-warning-800 dark:text-warning-300">{msg.message}</p>
         </div>
       ))}
     </div>

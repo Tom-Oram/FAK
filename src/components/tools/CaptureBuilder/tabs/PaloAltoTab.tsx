@@ -148,62 +148,62 @@ export default function PaloAltoTab() {
         </div>
         <div className="card-body space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Filter Name *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Filter Name *</label>
             <input
               type="text"
               value={options.filterName}
               onChange={(e) => updateOption('filterName', e.target.value)}
               placeholder="capture1"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Source IP</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Source IP</label>
               <input
                 type="text"
                 value={options.sourceIp}
                 onChange={(e) => updateOption('sourceIp', e.target.value)}
                 placeholder="10.0.0.1"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Destination IP</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Destination IP</label>
               <input
                 type="text"
                 value={options.destIp}
                 onChange={(e) => updateOption('destIp', e.target.value)}
                 placeholder="10.0.0.2"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Source Port</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Source Port</label>
               <input
                 type="number"
                 value={options.sourcePort}
                 onChange={(e) => updateOption('sourcePort', e.target.value)}
                 placeholder="Any"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Destination Port</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Destination Port</label>
               <input
                 type="number"
                 value={options.destPort}
                 onChange={(e) => updateOption('destPort', e.target.value)}
                 placeholder="443"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Protocol</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Protocol</label>
               <select
                 value={options.protocol}
                 onChange={(e) => updateOption('protocol', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               >
                 {PALOALTO_PROTOCOLS.map((p) => (
                   <option key={p.value} value={p.value}>
@@ -213,13 +213,13 @@ export default function PaloAltoTab() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">File Name</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">File Name</label>
               <input
                 type="text"
                 value={options.fileName}
                 onChange={(e) => updateOption('fileName', e.target.value)}
                 placeholder="capture.pcap"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               />
             </div>
           </div>
@@ -246,7 +246,7 @@ export default function PaloAltoTab() {
                   onChange={(e) => updateOption(key as keyof PaloAltoOptions, e.target.checked as never)}
                   className="rounded border-slate-300"
                 />
-                <span className="text-sm text-slate-700">{label}</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
               </label>
             ))}
           </div>
@@ -267,7 +267,7 @@ export default function PaloAltoTab() {
                 onChange={(e) => updateOption('includeCounters', e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="text-sm text-slate-700">Show counter global filter</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Show counter global filter</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -276,7 +276,7 @@ export default function PaloAltoTab() {
                 onChange={(e) => updateOption('includeSessions', e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="text-sm text-slate-700">Show session all filter</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Show session all filter</span>
             </label>
           </div>
         </div>
@@ -286,7 +286,7 @@ export default function PaloAltoTab() {
       <div className="card">
         <button
           onClick={() => setShowGuiSteps(!showGuiSteps)}
-          className="w-full card-header flex items-center justify-between hover:bg-slate-50 transition-colors"
+          className="w-full card-header flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
         >
           <h3 className="font-semibold text-slate-900 dark:text-white">GUI Steps</h3>
           {showGuiSteps ? (
@@ -296,14 +296,14 @@ export default function PaloAltoTab() {
           )}
         </button>
         {showGuiSteps && (
-          <div className="card-body border-t border-slate-200">
+          <div className="card-body border-t border-slate-200 dark:border-slate-700">
             <ol className="space-y-2">
               {guiSteps.map((step) => (
                 <li key={step.step} className="flex items-start gap-3">
                   <span className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center text-sm font-medium">
                     {step.step}
                   </span>
-                  <span className="text-sm text-slate-700">{step.text}</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">{step.text}</span>
                 </li>
               ))}
             </ol>

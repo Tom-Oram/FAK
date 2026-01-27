@@ -186,11 +186,11 @@ export default function FortinetTab() {
         <div className="card-body space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Interface</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Interface</label>
               <select
                 value={options.interface}
                 onChange={(e) => updateOption('interface', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               >
                 {FORTINET_INTERFACES.map((iface) => (
                   <option key={iface.value} value={iface.value}>
@@ -205,24 +205,24 @@ export default function FortinetTab() {
                   value={options.customInterface}
                   onChange={(e) => updateOption('customInterface', e.target.value)}
                   placeholder="Enter interface name"
-                  className="mt-2 w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="mt-2 w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
                 />
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Packet Count</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Packet Count</label>
               <input
                 type="number"
                 value={options.packetCount}
                 onChange={(e) => updateOption('packetCount', e.target.value)}
                 placeholder="0 = unlimited"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Verbosity Level</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Verbosity Level</label>
             <div className="flex flex-wrap gap-2">
               {(['1', '2', '3', '4', '5', '6'] as const).map((v) => (
                 <button
@@ -238,7 +238,7 @@ export default function FortinetTab() {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
               1=headers, 2=+data, 3=+hex, 4=+interface, 5=+timestamp, 6=+ether header
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function FortinetTab() {
               onChange={(e) => updateOption('absoluteTimestamp', e.target.checked)}
               className="rounded border-slate-300"
             />
-            <span className="text-sm text-slate-700">Show absolute timestamp (a)</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300">Show absolute timestamp (a)</span>
           </label>
 
           <BpfFilterBuilder value={filter} onChange={setFilter} />
@@ -268,19 +268,19 @@ export default function FortinetTab() {
               onChange={(e) => updateOption('debugFlowEnabled', e.target.checked)}
               className="rounded border-slate-300"
             />
-            <span className="text-sm text-slate-700">Enable</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300">Enable</span>
           </label>
         </div>
         {options.debugFlowEnabled && (
           <div className="card-body space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Address Filter</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Address Filter</label>
               <input
                 type="text"
                 value={options.debugFlowAddress}
                 onChange={(e) => updateOption('debugFlowAddress', e.target.value)}
                 placeholder="10.0.0.1 (optional)"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
               />
             </div>
             <label className="flex items-center gap-2">
@@ -290,7 +290,7 @@ export default function FortinetTab() {
                 onChange={(e) => updateOption('debugFlowVerbose', e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="text-sm text-slate-700">Verbose output (100 packets vs 20)</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Verbose output (100 packets vs 20)</span>
             </label>
           </div>
         )}

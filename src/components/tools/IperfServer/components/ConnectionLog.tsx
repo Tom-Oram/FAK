@@ -19,13 +19,13 @@ export default function ConnectionLog({ events }: ConnectionLogProps) {
 
   return (
     <div className="card">
-      <div className="p-4 border-b border-slate-100">
+      <div className="p-4 border-b border-slate-100 dark:border-slate-800">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Connection Log</h3>
       </div>
 
       <div ref={logRef} className="p-4 h-64 overflow-y-auto space-y-2">
         {events.length === 0 ? (
-          <div className="text-center text-slate-500 py-8">
+          <div className="text-center text-slate-500 dark:text-slate-400 py-8">
             No connections yet
           </div>
         ) : (
@@ -47,11 +47,11 @@ function LogEntry({ event }: { event: ConnectionEvent }) {
   return (
     <div className="flex items-start gap-2 text-sm">
       <Icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${colorClass}`} />
-      <span className="text-slate-500 flex-shrink-0">{timestamp}</span>
+      <span className="text-slate-500 dark:text-slate-400 flex-shrink-0">{timestamp}</span>
       {event.clientIp && (
-        <span className="font-mono text-slate-700">{event.clientIp}</span>
+        <span className="font-mono text-slate-700 dark:text-slate-300">{event.clientIp}</span>
       )}
-      <span className="text-slate-600">{event.details}</span>
+      <span className="text-slate-600 dark:text-slate-400">{event.details}</span>
     </div>
   )
 }

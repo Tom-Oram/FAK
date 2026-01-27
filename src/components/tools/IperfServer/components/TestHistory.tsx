@@ -3,7 +3,27 @@ import { useState, useEffect } from 'react'
 import { Download, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import type { TestResult, HistoryResponse } from '../types'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+// Auto-detect API URL based on environment
+function getApiUrl(): string {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL
+  }
+
+  const protocol = window.location.protocol
+  const host = window.location.host
+  const port = window.location.port
+
+  // Development mode (Vite dev server) - connect directly to backend
+  const devPorts = ['5173', '5174', '5175', '5176', '3000']
+  if (devPorts.includes(port)) {
+    return 'http://localhost:8080'
+  }
+
+  // Production or Docker mode - use nginx proxy paths
+  return `${protocol}//${host}/iperf`
+}
+
+const API_URL = getApiUrl()
 
 export default function TestHistory() {
   const [results, setResults] = useState<TestResult[]>([])
@@ -50,7 +70,7 @@ export default function TestHistory() {
 
   return (
     <div className="card">
-      <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+      <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Test History</h3>
         <div className="flex items-center gap-2">
           <button onClick={exportCSV} className="btn-secondary text-sm flex items-center gap-1">
@@ -65,7 +85,7 @@ export default function TestHistory() {
       </div>
 
       {/* Filters */}
-      <div className="p-4 border-b border-slate-100 flex items-center gap-4">
+      <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-4">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -96,51 +116,51 @@ export default function TestHistory() {
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50">
+          <thead className="bg-slate-50 dark:bg-slate-800">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-slate-700">Time</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-700">Client</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-700">Protocol</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-700">Duration</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-700">Avg</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-700">Peak</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-700">Direction</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-700 dark:text-slate-300">Time</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-700 dark:text-slate-300">Client</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-700 dark:text-slate-300">Protocol</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-700 dark:text-slate-300">Duration</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-700 dark:text-slate-300">Avg</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-700 dark:text-slate-300">Peak</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-700 dark:text-slate-300">Direction</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
                   Loading...
                 </td>
               </tr>
             ) : results.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
                   No test results yet
                 </td>
               </tr>
             ) : (
               results.map((result) => (
-                <tr key={result.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 text-slate-600">
+                <tr key={result.id} className="hover:bg-slate-50 dark:hover:bg-slate-800">
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
                     {new Date(result.timestamp).toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 font-mono text-slate-700">{result.clientIp}</td>
-                  <td className="px-4 py-3 uppercase text-slate-600">{result.protocol}</td>
-                  <td className="px-4 py-3 text-slate-600">{result.duration.toFixed(1)}s</td>
+                  <td className="px-4 py-3 font-mono text-slate-700 dark:text-slate-300">{result.clientIp}</td>
+                  <td className="px-4 py-3 uppercase text-slate-600 dark:text-slate-400">{result.protocol}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{result.duration.toFixed(1)}s</td>
                   <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">
                     {formatBandwidth(result.avgBandwidth)}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
                     {formatBandwidth(result.maxBandwidth)}
                   </td>
                   <td className="px-4 py-3">
                     <span
                       className={`px-2 py-0.5 rounded text-xs font-medium ${
                         result.direction === 'upload'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-green-100 text-green-700'
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'
+                          : 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
                       }`}
                     >
                       {result.direction}
@@ -155,8 +175,8 @@ export default function TestHistory() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="p-4 border-t border-slate-100 flex items-center justify-between">
-          <span className="text-sm text-slate-600">
+        <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <span className="text-sm text-slate-600 dark:text-slate-400">
             Showing {page * pageSize + 1}-{Math.min((page + 1) * pageSize, total)} of {total}
           </span>
           <div className="flex items-center gap-2">
@@ -167,7 +187,7 @@ export default function TestHistory() {
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-sm text-slate-600">
+            <span className="text-sm text-slate-600 dark:text-slate-400">
               Page {page + 1} of {totalPages}
             </span>
             <button

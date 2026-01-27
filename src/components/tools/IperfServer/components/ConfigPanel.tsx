@@ -31,11 +31,11 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
       </button>
 
       {isExpanded && (
-        <div className="card-body border-t border-slate-100 space-y-4">
+        <div className="card-body border-t border-slate-100 dark:border-slate-800 space-y-4">
           {/* Port and Bind Address */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Port
               </label>
               <input
@@ -49,7 +49,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Bind Address
               </label>
               <input
@@ -65,7 +65,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
 
           {/* Protocol */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
               Protocol
             </label>
             <div className="flex gap-4">
@@ -79,7 +79,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
                   disabled={disabled}
                   className="text-primary-600"
                 />
-                <span className="text-sm text-slate-700">TCP</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">TCP</span>
               </label>
               <label className="flex items-center gap-2">
                 <input
@@ -91,7 +91,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
                   disabled={disabled}
                   className="text-primary-600"
                 />
-                <span className="text-sm text-slate-700">UDP</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">UDP</span>
               </label>
             </div>
           </div>
@@ -107,14 +107,14 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
                   disabled={disabled}
                   className="text-primary-600 rounded"
                 />
-                <span className="text-sm text-slate-700">One-off mode</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">One-off mode</span>
               </label>
-              <p className="text-xs text-slate-500 mt-1 ml-6">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 ml-6">
                 Stop after single client test
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Idle Timeout (seconds)
               </label>
               <input
@@ -127,13 +127,13 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
                 min={0}
                 className="input w-full"
               />
-              <p className="text-xs text-slate-500 mt-1">0 = no timeout</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">0 = no timeout</p>
             </div>
           </div>
 
           {/* Allowlist */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
               Allowed Clients (IP/CIDR)
             </label>
             <textarea

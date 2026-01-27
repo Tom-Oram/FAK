@@ -53,18 +53,18 @@ export default function IperfServer() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">iPerf Server</h1>
-        <p className="mt-1 text-slate-600">
+        <p className="mt-1 text-slate-600 dark:text-slate-400">
           Run an iperf3 server for bandwidth testing with real-time monitoring
         </p>
       </div>
 
       {/* Error Banner */}
       {displayError && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-red-800">Error</p>
-            <p className="text-sm text-red-700">{displayError}</p>
+            <p className="font-medium text-red-800 dark:text-red-300">Error</p>
+            <p className="text-sm text-red-700 dark:text-red-400">{displayError}</p>
           </div>
         </div>
       )}

@@ -57,15 +57,15 @@ export default function ServerControls({
         </div>
 
         {status === 'running' && listenAddr && (
-          <div className="p-4 bg-slate-50 rounded-lg space-y-2">
+          <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-slate-700">Listening on:</span>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Listening on:</span>
               <span className="font-mono text-primary-600">{listenAddr}</span>
             </div>
 
-            <div className="pt-2 border-t border-slate-200">
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-slate-700">Client command:</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Client command:</span>
                 <button
                   onClick={copyCommand}
                   className="text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1"
@@ -103,7 +103,7 @@ function StatusBadge({
 }) {
   if (!isConnected) {
     return (
-      <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">
+      <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 rounded-full">
         Connecting...
       </span>
     )
@@ -112,20 +112,20 @@ function StatusBadge({
   switch (status) {
     case 'running':
       return (
-        <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full flex items-center gap-1">
+        <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 rounded-full flex items-center gap-1">
           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           Running
         </span>
       )
     case 'error':
       return (
-        <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">
+        <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 rounded-full">
           Error
         </span>
       )
     default:
       return (
-        <span className="px-2 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-full">
+        <span className="px-2 py-1 text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-full">
           Stopped
         </span>
       )
