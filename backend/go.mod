@@ -1,6 +1,6 @@
 module github.com/Tom-Oram/fak/backend
 
-go 1.25.2
+go 1.22
 
 require (
 	github.com/go-chi/chi/v5 v5.2.4 // indirect
