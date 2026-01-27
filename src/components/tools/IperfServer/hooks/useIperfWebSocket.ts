@@ -10,8 +10,37 @@ import type {
   ServerStatusPayload,
 } from '../types'
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8080/ws'
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+// Auto-detect URLs based on environment
+function getApiUrls() {
+  // Environment variables take precedence
+  if (import.meta.env.VITE_WS_URL && import.meta.env.VITE_API_URL) {
+    return {
+      wsUrl: import.meta.env.VITE_WS_URL,
+      apiUrl: import.meta.env.VITE_API_URL,
+    }
+  }
+
+  // In production (via nginx proxy), use relative paths
+  const protocol = window.location.protocol
+  const host = window.location.host
+  const wsProtocol = protocol === 'https:' ? 'wss:' : 'ws:'
+
+  // Check if running behind nginx (production)
+  if (window.location.port === '' || window.location.port === '80' || window.location.port === '443') {
+    return {
+      wsUrl: `${wsProtocol}//${host}/iperf/ws`,
+      apiUrl: `${protocol}//${host}/iperf`,
+    }
+  }
+
+  // Development mode - connect directly to backend
+  return {
+    wsUrl: 'ws://localhost:8080/ws',
+    apiUrl: 'http://localhost:8080',
+  }
+}
+
+const { wsUrl: WS_URL, apiUrl: API_URL } = getApiUrls()
 
 interface UseIperfWebSocketReturn {
   status: ServerStatus
