@@ -1,151 +1,163 @@
+// src/components/layout/Dashboard.tsx
 import { Link } from 'react-router-dom'
 import {
   FileSearch,
-  Network,
-  Shield,
-  ArrowRight,
+  Globe,
+  ShieldCheck,
   Route,
   Terminal,
+  Gauge,
+  ArrowRight,
+  Zap,
 } from 'lucide-react'
+import SystemHealthBar from './SystemHealthBar'
+import RecentActivity from './RecentActivity'
 
 const tools = [
   {
     name: 'PCAP Analyzer',
-    description: 'Analyze packet captures to identify network issues, security threats, and performance problems.',
+    description: 'Analyze packet captures to identify network issues and security threats.',
     href: '/pcap-analyzer',
     icon: FileSearch,
-    features: ['pcap & pcapng support', 'Pattern detection', 'Protocol analysis', 'Actionable insights'],
+    subtitle: 'pcap & pcapng • Pattern detection',
+    color: 'from-blue-500 to-blue-600',
   },
   {
     name: 'DNS Lookup',
-    description: 'Query DNS records from multiple public resolvers, compare results, and detect propagation issues.',
+    description: 'Query DNS records from multiple resolvers with DNSSEC validation.',
     href: '/dns-lookup',
-    icon: Network,
-    features: ['All record types', 'Multi-resolver query', 'DNSSEC status', 'Response comparison'],
+    icon: Globe,
+    subtitle: '10 record types • 3 resolvers',
+    color: 'from-green-500 to-green-600',
   },
   {
-    name: 'SSL/TLS Checker',
-    description: 'Validate SSL certificates, check expiration dates, and verify issuer chains via Certificate Transparency.',
+    name: 'SSL Checker',
+    description: 'Validate certificates via Certificate Transparency logs.',
     href: '/ssl-checker',
-    icon: Shield,
-    features: ['Certificate details', 'Expiry alerts', 'CT log query', 'Security checks'],
+    icon: ShieldCheck,
+    subtitle: 'CT log query • Chain validation',
+    color: 'from-purple-500 to-purple-600',
   },
   {
     name: 'Path Tracer',
-    description: 'Perform layer 3 hop-by-hop path discovery with NetBox device lookup integration and RTT analysis.',
+    description: 'Layer 3 hop-by-hop path discovery with NetBox integration.',
     href: '/path-tracer',
     icon: Route,
-    features: ['L3 traceroute', 'NetBox integration', 'RTT metrics', 'Device lookup'],
+    subtitle: 'RTT analysis • Device lookup',
+    color: 'from-orange-500 to-orange-600',
+  },
+  {
+    name: 'iPerf Server',
+    description: 'Run bandwidth tests with real-time monitoring and history.',
+    href: '/iperf-server',
+    icon: Gauge,
+    subtitle: 'Live graphs • WebSocket updates',
+    color: 'from-cyan-500 to-cyan-600',
   },
   {
     name: 'Capture Builder',
-    description: 'Generate packet capture commands for tcpdump, Fortinet, Palo Alto, and Cisco ASA devices.',
+    description: 'Generate capture commands for tcpdump, Fortinet, Palo Alto, and ASA.',
     href: '/capture-builder',
     icon: Terminal,
-    features: ['Multi-platform', 'Visual filter builder', 'Command workflows', 'Cheat sheet'],
+    subtitle: 'Multi-platform • Visual builder',
+    color: 'from-pink-500 to-pink-600',
   },
 ]
 
 export default function Dashboard() {
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">
-            First Aid Kit
-          </h1>
-          <p className="mt-1 text-slate-600">
-            Your first port of call for network incident diagnostics
-          </p>
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* System Health Bar */}
+      <SystemHealthBar />
+
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 dark:from-slate-800 dark:to-slate-900 dark:border dark:border-primary-500/20 p-6 lg:p-8">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+                <path d="M 32 0 L 0 0 0 32" fill="none" stroke="currentColor" strokeWidth="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
         </div>
-        <Link
-          to="/pcap-analyzer"
-          className="btn-primary inline-flex items-center gap-2"
-        >
-          <FileSearch className="w-4 h-4" />
-          Start PCAP Analysis
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+
+        <div className="relative">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-white flex items-center gap-3">
+                First Aid Kit
+                <span className="text-sm font-normal bg-white/20 px-2 py-0.5 rounded-full">v1.0</span>
+              </h1>
+              <p className="mt-2 text-primary-100 dark:text-slate-300 max-w-xl">
+                Your first port of call for network incident diagnostics. Analyze captures, trace paths, test bandwidth, and more.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/pcap-analyzer"
+                className="btn bg-white text-primary-700 hover:bg-primary-50 shadow-lg shadow-primary-900/20"
+              >
+                <FileSearch className="w-4 h-4 mr-2" />
+                Analyze PCAP
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
+              <Link
+                to="/iperf-server"
+                className="btn bg-white/10 text-white border border-white/20 hover:bg-white/20"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Bandwidth Test
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Tools Grid */}
-      <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Available Tools</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tools.map((tool) => (
-            <Link
-              key={tool.name}
-              to={tool.href}
-              className="card overflow-hidden transition-all duration-200 hover:shadow-md hover:border-primary-200"
-            >
-              <ToolCard tool={tool} />
-            </Link>
-          ))}
+      {/* Main Content: Tools + Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Tool Grid */}
+        <div className="lg:col-span-2">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Tools</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {tools.map((tool, index) => (
+              <Link
+                key={tool.name}
+                to={tool.href}
+                className="card card-hover group"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="p-4">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-110`}>
+                      <tool.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                        {tool.name}
+                      </h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">
+                        {tool.description}
+                      </p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                        {tool.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Quick Start Guide */}
-      <div className="card bg-gradient-to-br from-primary-600 to-primary-700 text-white">
-        <div className="card-body">
-          <h2 className="text-xl font-semibold mb-2">Quick Start Guide</h2>
-          <p className="text-primary-100 mb-4">
-            New to First Aid Kit? Here's how to get started with your incident analysis:
-          </p>
-          <ol className="space-y-2 text-sm">
-            <li className="flex items-start gap-2">
-              <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-medium">
-                1
-              </span>
-              <span>Navigate to the PCAP Analyzer tool from the sidebar</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-medium">
-                2
-              </span>
-              <span>Upload your .pcap or .pcapng file using drag-and-drop or file browser</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-medium">
-                3
-              </span>
-              <span>Review the automated analysis for issues and recommended next steps</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-medium">
-                4
-              </span>
-              <span>Export findings or dive deeper into specific protocol details</span>
-            </li>
-          </ol>
+        {/* Recent Activity */}
+        <div className="lg:col-span-1">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Activity</h2>
+          <RecentActivity />
         </div>
       </div>
     </div>
-  )
-}
-
-function ToolCard({ tool }: { tool: typeof tools[0] }) {
-  return (
-    <>
-      <div className="p-4 border-b border-slate-100">
-        <div className="p-2 bg-primary-50 rounded-lg w-fit">
-          <tool.icon className="w-6 h-6 text-primary-600" />
-        </div>
-        <h3 className="mt-3 text-lg font-semibold text-slate-900">{tool.name}</h3>
-        <p className="mt-1 text-sm text-slate-600">{tool.description}</p>
-      </div>
-      <div className="p-4 bg-slate-50">
-        <div className="flex flex-wrap gap-2">
-          {tool.features.map((feature) => (
-            <span
-              key={feature}
-              className="text-xs bg-white px-2 py-1 rounded border border-slate-200 text-slate-600"
-            >
-              {feature}
-            </span>
-          ))}
-        </div>
-      </div>
-    </>
   )
 }

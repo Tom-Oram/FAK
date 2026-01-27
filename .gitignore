@@ -29,6 +29,11 @@ yarn-error.log*
 # Test coverage
 coverage/
 
+# Go build artifacts
+backend/server
+backend/main
+backend/data/
+
 # TypeScript cache
 *.tsbuildinfo
 

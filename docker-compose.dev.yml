@@ -1,0 +1,30 @@
+# docker-compose.dev.yml - Development overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # Development frontend with hot reloading
+  frontend:
+    build:
+      context: .
+      target: builder
+    command: npm run dev -- --host
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8082
+      VITE_WS_URL: ws://localhost:8082/ws
+
+  # Development backend with live reload would require air or similar
+  iperf-backend:
+    build:
+      context: ./backend
+    volumes:
+      - ./backend:/app/src
+      - iperf-data:/app/data
+    environment:
+      DATA_DIR: /app/data
+      PORT: "8080"
+      DEBUG: "true"

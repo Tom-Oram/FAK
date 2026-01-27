@@ -6,6 +6,7 @@ import {
   SslChecker,
   PathTracer,
   CaptureBuilder,
+  IperfServer,
 } from './components/tools'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="ssl-checker" element={<SslChecker />} />
         <Route path="path-tracer" element={<PathTracer />} />
         <Route path="capture-builder" element={<CaptureBuilder />} />
+        <Route path="iperf-server" element={<IperfServer />} />
       </Route>
     </Routes>
   )
