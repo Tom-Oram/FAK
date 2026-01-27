@@ -1,6 +1,6 @@
 // src/components/tools/IperfServer/index.tsx
-import { useState } from 'react'
-import { AlertCircle } from 'lucide-react'
+import { useState, Component, ErrorInfo, ReactNode } from 'react'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import { useIperfWebSocket } from './hooks/useIperfWebSocket'
 import {
   ServerControls,
@@ -12,7 +12,56 @@ import {
 import type { ServerConfig } from './types'
 import { DEFAULT_CONFIG } from './types'
 
-export default function IperfServer() {
+// Error boundary to catch rendering errors
+interface ErrorBoundaryState {
+  hasError: boolean
+  error: Error | null
+}
+
+class IperfErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('IperfServer error:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-medium text-red-800 dark:text-red-300">Component Error</p>
+                <p className="text-sm text-red-700 dark:text-red-400 mt-1">
+                  {this.state.error?.message || 'An unexpected error occurred'}
+                </p>
+                <button
+                  onClick={() => this.setState({ hasError: false, error: null })}
+                  className="mt-3 flex items-center gap-2 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Try Again
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+function IperfServerContent() {
   const {
     status,
     config: serverConfig,
@@ -94,5 +143,13 @@ export default function IperfServer() {
       {/* Test History */}
       <TestHistory />
     </div>
+  )
+}
+
+export default function IperfServer() {
+  return (
+    <IperfErrorBoundary>
+      <IperfServerContent />
+    </IperfErrorBoundary>
   )
 }

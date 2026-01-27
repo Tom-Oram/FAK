@@ -1,10 +1,14 @@
 // src/components/tools/IperfServer/components/TestHistory.tsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Download, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import type { TestResult, HistoryResponse } from '../types'
 
 // Auto-detect API URL based on environment
 function getApiUrl(): string {
+  if (typeof window === 'undefined') {
+    return '/iperf' // SSR fallback
+  }
+
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL
   }
@@ -23,8 +27,6 @@ function getApiUrl(): string {
   return `${protocol}//${host}/iperf`
 }
 
-const API_URL = getApiUrl()
-
 export default function TestHistory() {
   const [results, setResults] = useState<TestResult[]>([])
   const [total, setTotal] = useState(0)
@@ -32,8 +34,13 @@ export default function TestHistory() {
   const [pageSize, setPageSize] = useState(25)
   const [clientFilter, setClientFilter] = useState('')
   const [loading, setLoading] = useState(false)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  // Compute API URL at render time to ensure window is available
+  const apiUrl = useMemo(() => getApiUrl(), [])
 
   const fetchHistory = async () => {
+    setFetchError(null)
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -44,26 +51,32 @@ export default function TestHistory() {
         params.set('clientIp', clientFilter)
       }
 
-      const response = await fetch(`${API_URL}/api/history?${params}`)
+      const response = await fetch(`${apiUrl}/api/history?${params}`)
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
       const data: HistoryResponse = await response.json()
       setResults(data.results || [])
-      setTotal(data.total)
+      setTotal(data.total ?? 0)
     } catch (e) {
       console.error('Failed to fetch history:', e)
+      setFetchError((e as Error).message)
+      setResults([])
+      setTotal(0)
     }
     setLoading(false)
   }
 
   useEffect(() => {
     fetchHistory()
-  }, [page, pageSize, clientFilter])
+  }, [page, pageSize, clientFilter, apiUrl])
 
   const exportCSV = () => {
-    window.open(`${API_URL}/api/history/export?format=csv`, '_blank')
+    window.open(`${apiUrl}/api/history/export?format=csv`, '_blank')
   }
 
   const exportJSON = () => {
-    window.open(`${API_URL}/api/history/export?format=json`, '_blank')
+    window.open(`${apiUrl}/api/history/export?format=json`, '_blank')
   }
 
   const totalPages = Math.ceil(total / pageSize)

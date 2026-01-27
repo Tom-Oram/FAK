@@ -17,15 +17,21 @@ interface LiveGraphProps {
 }
 
 export default function LiveGraph({ data, onClear }: LiveGraphProps) {
-  const chartData = data.map((d, i) => ({
+  // Safely handle data - ensure it's always an array
+  const safeData = Array.isArray(data) ? data : []
+
+  const chartData = safeData.map((d, i) => ({
     time: i,
-    bandwidth: d.bitsPerSecond,
-    label: formatBandwidth(d.bitsPerSecond),
+    bandwidth: d?.bitsPerSecond ?? 0,
+    label: formatBandwidth(d?.bitsPerSecond ?? 0),
   }))
 
-  // Calculate Y-axis domain
-  const maxBandwidth = Math.max(...data.map((d) => d.bitsPerSecond), 1e6)
-  const yMax = roundUpNice(maxBandwidth)
+  // Calculate Y-axis domain with safe defaults
+  const bandwidthValues = safeData.map((d) => d?.bitsPerSecond ?? 0)
+  const maxBandwidth = bandwidthValues.length > 0
+    ? Math.max(...bandwidthValues, 1e6)
+    : 1e6
+  const yMax = roundUpNice(maxBandwidth > 0 ? maxBandwidth : 1e6)
 
   return (
     <div className="card">
@@ -41,7 +47,7 @@ export default function LiveGraph({ data, onClear }: LiveGraphProps) {
       </div>
 
       <div className="p-4">
-        {data.length === 0 ? (
+        {safeData.length === 0 ? (
           <div className="h-64 flex items-center justify-center text-slate-500 dark:text-slate-400">
             Waiting for data...
           </div>
