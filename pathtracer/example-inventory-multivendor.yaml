@@ -1,0 +1,112 @@
+# Multi-Vendor Network Inventory Example
+#
+# This demonstrates a heterogeneous network with multiple vendor devices
+
+devices:
+  # Cisco IOS Router
+  - hostname: core-rtr-01
+    management_ip: 10.1.1.1
+    vendor: cisco_ios
+    device_type: router
+    credentials_ref: default
+    subnets:
+      - 10.10.0.0/16
+      - 172.16.0.0/12
+    default_vrf: global
+    logical_contexts:
+      - global
+      - VRF_CORP
+      - VRF_GUEST
+    metadata:
+      location: datacenter-1
+      role: core
+      model: ISR4451
+
+  # Arista EOS Switch
+  - hostname: dist-sw-01
+    management_ip: 10.1.1.2
+    vendor: arista_eos
+    device_type: l3_switch
+    credentials_ref: default
+    subnets:
+      - 10.20.0.0/16
+    default_vrf: default
+    logical_contexts:
+      - default
+      - PROD
+      - DEV
+    metadata:
+      location: datacenter-1
+      role: distribution
+      model: DCS-7280SR-48C6
+
+  # Palo Alto Firewall
+  - hostname: fw-pa-01
+    management_ip: 10.1.1.10
+    vendor: paloalto
+    device_type: firewall
+    credentials_ref: firewall_creds
+    subnets:
+      - 192.168.0.0/16
+      - 172.20.0.0/16
+    default_virtual_router: default
+    default_context: default
+    logical_contexts:
+      - default
+      - trust
+      - untrust
+    metadata:
+      location: datacenter-1
+      role: perimeter-firewall
+      model: PA-3220
+
+  # Aruba AOS-CX Switch
+  - hostname: access-sw-01
+    management_ip: 10.1.1.3
+    vendor: aruba
+    device_type: l3_switch
+    credentials_ref: default
+    subnets:
+      - 192.168.1.0/24
+      - 192.168.2.0/24
+    default_vrf: default
+    logical_contexts:
+      - default
+      - campus
+    metadata:
+      location: building-a
+      role: access
+      model: 6300M
+
+  # Cisco NX-OS Switch
+  - hostname: dc-sw-01
+    management_ip: 10.1.1.5
+    vendor: cisco_nxos
+    device_type: l3_switch
+    credentials_ref: default
+    subnets:
+      - 10.100.0.0/16
+    default_vrf: default
+    logical_contexts:
+      - default
+      - management
+    metadata:
+      location: datacenter-1
+      role: tor
+      model: N9K-C9336C-FX2
+
+  # Another Arista for redundancy
+  - hostname: dist-sw-02
+    management_ip: 10.1.1.6
+    vendor: arista_eos
+    device_type: l3_switch
+    credentials_ref: default
+    subnets:
+      - 10.30.0.0/16
+    default_vrf: default
+    logical_contexts:
+      - default
+    metadata:
+      location: datacenter-1
+      role: distribution
+      model: DCS-7280SR-48C6

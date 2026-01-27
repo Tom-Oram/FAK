@@ -1,0 +1,517 @@
+import { useState, useCallback } from 'react';
+import {
+  Route,
+  Play,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Server,
+  Globe,
+  MapPin,
+  Info,
+  ChevronDown,
+  ChevronRight,
+  Network,
+  Activity,
+} from 'lucide-react';
+
+interface Hop {
+  ttl: number;
+  ip: string;
+  hostname?: string;
+  rtt: number;
+  device?: NetBoxDevice;
+  scanopyDevice?: ScanopyDevice;
+  asn?: string;
+}
+
+interface NetBoxDevice {
+  name: string;
+  site?: string;
+  role?: string;
+  platform?: string;
+  status?: string;
+}
+
+interface ScanopyDevice {
+  name: string;
+  hostname?: string;
+  services?: string[];
+  tags?: string[];
+  discovered?: string;
+}
+
+interface TraceResult {
+  sourceIp: string;
+  destinationIp: string;
+  hops: Hop[];
+  startTime: Date;
+  endTime?: Date;
+  status: 'running' | 'complete' | 'error';
+  error?: string;
+}
+
+export default function PathTracer() {
+  const [sourceIp, setSourceIp] = useState('');
+  const [destinationIp, setDestinationIp] = useState('');
+  const [traceResult, setTraceResult] = useState<TraceResult | null>(null);
+  const [isTracing, setIsTracing] = useState(false);
+  const [expandedHops, setExpandedHops] = useState<Set<number>>(new Set());
+  const [netboxUrl, setNetboxUrl] = useState('');
+  const [netboxToken, setNetboxToken] = useState('');
+  const [showSettings, setShowSettings] = useState(false);
+
+  const toggleHop = useCallback((ttl: number) => {
+    setExpandedHops(prev => {
+      const next = new Set(prev);
+      if (next.has(ttl)) {
+        next.delete(ttl);
+      } else {
+        next.add(ttl);
+      }
+      return next;
+    });
+  }, []);
+
+  const startTrace = useCallback(async () => {
+    if (!sourceIp || !destinationIp) return;
+
+    setIsTracing(true);
+    setTraceResult({
+      sourceIp,
+      destinationIp,
+      hops: [],
+      startTime: new Date(),
+      status: 'running',
+    });
+
+    try {
+      // Call backend API
+      const response = await fetch('/api/traceroute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: sourceIp,
+          destination: destinationIp,
+          netboxUrl: netboxUrl || undefined,
+          netboxToken: netboxToken || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      setTraceResult({
+        sourceIp,
+        destinationIp,
+        hops: result.hops,
+        startTime: new Date(result.startTime),
+        endTime: new Date(result.endTime),
+        status: 'complete',
+      });
+    } catch (error) {
+      setTraceResult(prev => ({
+        ...prev!,
+        status: 'error',
+        endTime: new Date(),
+        error: error instanceof Error ? error.message : 'Trace failed',
+      }));
+    } finally {
+      setIsTracing(false);
+    }
+  }, [sourceIp, destinationIp, netboxUrl, netboxToken]);
+
+  const getHopColor = (hop: Hop) => {
+    if (hop.rtt < 10) return 'text-success-600';
+    if (hop.rtt < 50) return 'text-warning-600';
+    return 'text-danger-600';
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Path Tracer</h1>
+        <p className="mt-1 text-slate-600">
+          Layer 3 hop-by-hop path discovery with NetBox device lookup
+        </p>
+      </div>
+
+      {/* Settings Panel */}
+      <div className="card">
+        <div className="card-header flex items-center justify-between">
+          <h2 className="font-semibold text-slate-900">Configuration</h2>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className="text-sm text-primary-600 hover:text-primary-700"
+          >
+            {showSettings ? 'Hide' : 'Show'} NetBox Settings
+          </button>
+        </div>
+        <div className="card-body space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Source IP Address
+              </label>
+              <div className="relative">
+                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  value={sourceIp}
+                  onChange={(e) => setSourceIp(e.target.value)}
+                  placeholder="192.168.1.1"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  disabled={isTracing}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Destination IP Address
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  value={destinationIp}
+                  onChange={(e) => setDestinationIp(e.target.value)}
+                  placeholder="8.8.8.8"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  disabled={isTracing}
+                />
+              </div>
+            </div>
+          </div>
+
+          {showSettings && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  NetBox URL (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={netboxUrl}
+                  onChange={(e) => setNetboxUrl(e.target.value)}
+                  placeholder="https://netbox.example.com"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  disabled={isTracing}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  NetBox API Token (Optional)
+                </label>
+                <input
+                  type="password"
+                  value={netboxToken}
+                  onChange={(e) => setNetboxToken(e.target.value)}
+                  placeholder="API token"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  disabled={isTracing}
+                />
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={startTrace}
+            disabled={isTracing || !sourceIp || !destinationIp}
+            className="btn-primary inline-flex items-center gap-2"
+          >
+            {isTracing ? (
+              <>
+                <Clock className="w-4 h-4 animate-spin" />
+                Tracing Path...
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                Start Trace
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Info Banner */}
+      <div className="flex items-start gap-3 p-4 bg-primary-50 border border-primary-200 rounded-lg">
+        <Info className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-primary-800">
+          <p className="font-medium mb-1">Backend API Required</p>
+          <p className="text-primary-700">
+            This tool requires a backend API server with Python/Scapy for traceroute functionality.
+            Devices discovered along the path are automatically enriched with data from Scanopy
+            (network topology) and NetBox (IPAM). See the documentation for setup instructions.
+          </p>
+        </div>
+      </div>
+
+      {/* Trace Results */}
+      {traceResult && (
+        <div className="card">
+          <div className="card-header flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Route className="w-5 h-5 text-primary-600" />
+              <div>
+                <h2 className="font-semibold text-slate-900">Path Trace Results</h2>
+                <p className="text-xs text-slate-500">
+                  {traceResult.sourceIp} → {traceResult.destinationIp}
+                </p>
+              </div>
+            </div>
+            {traceResult.status === 'running' && (
+              <span className="badge-info">Running</span>
+            )}
+            {traceResult.status === 'complete' && (
+              <span className="badge-success">Complete</span>
+            )}
+            {traceResult.status === 'error' && (
+              <span className="badge-danger">Error</span>
+            )}
+          </div>
+
+          <div className="card-body">
+            {traceResult.status === 'error' && (
+              <div className="flex items-start gap-3 p-4 bg-danger-50 border border-danger-200 rounded-lg mb-4">
+                <AlertCircle className="w-5 h-5 text-danger-600 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-danger-900">Trace Failed</p>
+                  <p className="text-sm text-danger-700 mt-1">{traceResult.error}</p>
+                </div>
+              </div>
+            )}
+
+            {traceResult.hops.length > 0 ? (
+              <div className="space-y-2">
+                {traceResult.hops.map((hop) => {
+                  const isExpanded = expandedHops.has(hop.ttl);
+                  return (
+                    <div
+                      key={hop.ttl}
+                      className="border border-slate-200 rounded-lg overflow-hidden"
+                    >
+                      <button
+                        onClick={() => toggleHop(hop.ttl)}
+                        className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 text-left"
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="w-4 h-4 text-slate-400" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-slate-400" />
+                        )}
+                        <div className="flex items-center gap-2 min-w-[3rem]">
+                          <span className="text-sm font-medium text-slate-900">
+                            Hop {hop.ttl}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-sm text-slate-900">
+                              {hop.ip}
+                            </span>
+                            {hop.hostname && (
+                              <span className="text-sm text-slate-500">
+                                ({hop.hostname})
+                              </span>
+                            )}
+                            {hop.device && (
+                              <span className="badge-info">{hop.device.name}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className={`flex items-center gap-1 ${getHopColor(hop)}`}>
+                          <Activity className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            {hop.rtt.toFixed(2)} ms
+                          </span>
+                        </div>
+                      </button>
+
+                      {isExpanded && (hop.scanopyDevice || hop.device || hop.asn) && (
+                        <div className="px-4 pb-4 border-t border-slate-200 bg-slate-50">
+                          <div className="grid grid-cols-2 gap-4 pt-4">
+                            {hop.scanopyDevice && (
+                              <>
+                                <div className="col-span-2">
+                                  <dt className="text-xs text-slate-500 mb-2 flex items-center gap-1">
+                                    <Network className="w-3 h-3" />
+                                    Scanopy Discovery
+                                  </dt>
+                                </div>
+                                <div>
+                                  <dt className="text-xs text-slate-500">Device Name</dt>
+                                  <dd className="text-sm font-medium text-slate-900 mt-1">
+                                    {hop.scanopyDevice.name}
+                                  </dd>
+                                </div>
+                                {hop.scanopyDevice.hostname && (
+                                  <div>
+                                    <dt className="text-xs text-slate-500">Hostname</dt>
+                                    <dd className="text-sm text-slate-900 mt-1">
+                                      {hop.scanopyDevice.hostname}
+                                    </dd>
+                                  </div>
+                                )}
+                                {hop.scanopyDevice.services && hop.scanopyDevice.services.length > 0 && (
+                                  <div className="col-span-2">
+                                    <dt className="text-xs text-slate-500">Services</dt>
+                                    <dd className="flex flex-wrap gap-1 mt-1">
+                                      {hop.scanopyDevice.services.map((service, idx) => (
+                                        <span
+                                          key={idx}
+                                          className="text-xs bg-success-100 text-success-700 px-2 py-0.5 rounded"
+                                        >
+                                          {service}
+                                        </span>
+                                      ))}
+                                    </dd>
+                                  </div>
+                                )}
+                                {hop.scanopyDevice.tags && hop.scanopyDevice.tags.length > 0 && (
+                                  <div className="col-span-2">
+                                    <dt className="text-xs text-slate-500">Tags</dt>
+                                    <dd className="flex flex-wrap gap-1 mt-1">
+                                      {hop.scanopyDevice.tags.map((tag, idx) => (
+                                        <span
+                                          key={idx}
+                                          className="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded"
+                                        >
+                                          {tag}
+                                        </span>
+                                      ))}
+                                    </dd>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                            {hop.device && (
+                              <>
+                                {hop.scanopyDevice && (
+                                  <div className="col-span-2 border-t border-slate-200 pt-4 mt-2">
+                                    <dt className="text-xs text-slate-500 mb-2 flex items-center gap-1">
+                                      <Server className="w-3 h-3" />
+                                      NetBox IPAM
+                                    </dt>
+                                  </div>
+                                )}
+                                <div>
+                                  <dt className="text-xs text-slate-500">Device Name</dt>
+                                  <dd className="text-sm font-medium text-slate-900 mt-1">
+                                    {hop.device.name}
+                                  </dd>
+                                </div>
+                                {hop.device.site && (
+                                  <div>
+                                    <dt className="text-xs text-slate-500">Site</dt>
+                                    <dd className="text-sm text-slate-900 mt-1">
+                                      {hop.device.site}
+                                    </dd>
+                                  </div>
+                                )}
+                                {hop.device.role && (
+                                  <div>
+                                    <dt className="text-xs text-slate-500">Role</dt>
+                                    <dd className="text-sm text-slate-900 mt-1">
+                                      {hop.device.role}
+                                    </dd>
+                                  </div>
+                                )}
+                                {hop.device.platform && (
+                                  <div>
+                                    <dt className="text-xs text-slate-500">Platform</dt>
+                                    <dd className="text-sm text-slate-900 mt-1">
+                                      {hop.device.platform}
+                                    </dd>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                            {hop.asn && (
+                              <div>
+                                <dt className="text-xs text-slate-500">ASN</dt>
+                                <dd className="text-sm text-slate-900 mt-1">{hop.asn}</dd>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : traceResult.status === 'running' ? (
+              <div className="text-center py-8">
+                <Clock className="w-12 h-12 text-primary-600 animate-spin mx-auto mb-3" />
+                <p className="text-slate-600">Discovering path...</p>
+              </div>
+            ) : null}
+
+            {traceResult.endTime && traceResult.status === 'complete' && (
+              <div className="mt-4 pt-4 border-t border-slate-200">
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <CheckCircle className="w-4 h-4 text-success-600" />
+                  <span>
+                    Trace completed in{' '}
+                    {((traceResult.endTime.getTime() - traceResult.startTime.getTime()) / 1000).toFixed(1)}s
+                    {' '}with {traceResult.hops.length} hops
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Setup Instructions */}
+      <div className="card bg-slate-50 border-slate-200">
+        <div className="card-body">
+          <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+            <Server className="w-5 h-5 text-primary-600" />
+            Backend API Setup
+          </h3>
+          <div className="space-y-2 text-sm text-slate-700">
+            <p>
+              This tool requires a Python backend API with Scapy. Create an endpoint at{' '}
+              <code className="bg-slate-200 px-1 rounded">/api/traceroute</code>:
+            </p>
+            <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-xs">
+{`from scapy.all import sr1, IP, ICMP
+import requests
+
+def traceroute(source, destination, netbox_url=None, netbox_token=None):
+    hops = []
+    for ttl in range(1, 31):
+        pkt = IP(src=source, dst=destination, ttl=ttl) / ICMP()
+        reply = sr1(pkt, timeout=2, verbose=0)
+
+        if reply:
+            hop = {
+                "ttl": ttl,
+                "ip": reply.src,
+                "rtt": (reply.time - pkt.sent_time) * 1000
+            }
+
+            # Optional: Lookup in NetBox
+            if netbox_url and netbox_token:
+                device = lookup_netbox(reply.src, netbox_url, netbox_token)
+                if device:
+                    hop["device"] = device
+
+            hops.append(hop)
+
+            if reply.src == destination:
+                break
+
+    return hops`}
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,50 @@
+# Example Network Inventory for Path Tracer
+#
+# This file defines your network devices and their subnet ownership
+
+devices:
+  - hostname: core-rtr-01
+    management_ip: 10.1.1.1
+    vendor: cisco_ios
+    device_type: router
+    credentials_ref: default
+    subnets:
+      - 10.10.0.0/16
+      - 172.16.0.0/12
+    default_vrf: global
+    logical_contexts:
+      - global
+      - VRF_CORP
+      - VRF_GUEST
+    metadata:
+      location: datacenter-1
+      role: core
+
+  - hostname: dist-rtr-01
+    management_ip: 10.1.1.2
+    vendor: cisco_ios
+    device_type: router
+    credentials_ref: default
+    subnets:
+      - 10.20.0.0/16
+    default_vrf: global
+    logical_contexts:
+      - global
+    metadata:
+      location: datacenter-1
+      role: distribution
+
+  - hostname: access-sw-01
+    management_ip: 10.1.1.3
+    vendor: cisco_ios
+    device_type: l3_switch
+    credentials_ref: default
+    subnets:
+      - 192.168.1.0/24
+      - 192.168.2.0/24
+    default_vrf: global
+    logical_contexts:
+      - global
+    metadata:
+      location: building-a
+      role: access

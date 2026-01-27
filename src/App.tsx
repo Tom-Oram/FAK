@@ -1,0 +1,24 @@
+import { Routes, Route } from 'react-router-dom'
+import { Layout, Dashboard } from './components/layout'
+import {
+  PcapAnalyzer,
+  DnsLookup,
+  SslChecker,
+  PathTracer,
+} from './components/tools'
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="pcap-analyzer" element={<PcapAnalyzer />} />
+        <Route path="dns-lookup" element={<DnsLookup />} />
+        <Route path="ssl-checker" element={<SslChecker />} />
+        <Route path="path-tracer" element={<PathTracer />} />
+      </Route>
+    </Routes>
+  )
+}
+
+export default App

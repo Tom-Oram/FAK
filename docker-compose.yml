@@ -1,0 +1,46 @@
+name: first-aid-kit
+
+services:
+  # First Aid Kit Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fak-frontend
+    ports:
+      - "8081:80"
+    networks:
+      - fak-network
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  # First Aid Kit Backend API (Traceroute)
+  backend:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    container_name: fak-backend
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: production
+      NETBOX_URL: ${NETBOX_URL:-}
+      NETBOX_TOKEN: ${NETBOX_TOKEN:-}
+      # Path tracer credentials
+      PATHTRACE_USER: ${PATHTRACE_USER:-}
+      PATHTRACE_PASS: ${PATHTRACE_PASS:-}
+      PATHTRACE_SECRET: ${PATHTRACE_SECRET:-}
+      PATHTRACE_INVENTORY: /app/pathtracer/inventory.yaml
+    volumes:
+      # Mount inventory and credentials from host (create these files first)
+      - ./pathtracer/inventory.yaml:/app/pathtracer/inventory.yaml:ro
+      - ./pathtracer/credentials.yaml:/app/pathtracer/credentials.yaml:ro
+    privileged: true  # Required for raw socket access (traceroute) and SSH
+    networks:
+      - fak-network
+    restart: unless-stopped
+
+networks:
+  fak-network:
+    driver: bridge
