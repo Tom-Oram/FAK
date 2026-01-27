@@ -49,6 +49,7 @@ export default function RecentActivity() {
           onClick={clearActivity}
           className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 rounded transition-colors"
           title="Clear history"
+          aria-label="Clear activity history"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -65,8 +66,8 @@ export default function RecentActivity() {
 }
 
 function ActivityRow({ item, isNew }: { item: ActivityItem; isNew: boolean }) {
-  const Icon = iconMap[item.type]
-  const colors = colorMap[item.type]
+  const Icon = iconMap[item.type] ?? FileSearch
+  const colors = colorMap[item.type] ?? 'text-slate-500 bg-slate-100 dark:bg-slate-800'
 
   return (
     <div className={`px-4 py-3 flex items-start gap-3 ${isNew ? 'animate-slide-in-right' : ''}`}>
