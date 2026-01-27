@@ -7,7 +7,6 @@ import {
   Route,
   Terminal,
   Gauge,
-  Terminal,
   ArrowRight,
   Zap,
 } from 'lucide-react'
@@ -46,13 +45,6 @@ const tools = [
     icon: Route,
     subtitle: 'RTT analysis • Device lookup',
     color: 'from-orange-500 to-orange-600',
-  },
-  {
-    name: 'Capture Builder',
-    description: 'Generate packet capture commands for tcpdump, Fortinet, Palo Alto, and Cisco ASA devices.',
-    href: '/capture-builder',
-    icon: Terminal,
-    features: ['Multi-platform', 'Visual filter builder', 'Command workflows', 'Cheat sheet'],
   },
   {
     name: 'iPerf Server',
