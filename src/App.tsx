@@ -5,6 +5,7 @@ import {
   DnsLookup,
   SslChecker,
   PathTracer,
+  CaptureBuilder,
 } from './components/tools'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="dns-lookup" element={<DnsLookup />} />
         <Route path="ssl-checker" element={<SslChecker />} />
         <Route path="path-tracer" element={<PathTracer />} />
+        <Route path="capture-builder" element={<CaptureBuilder />} />
       </Route>
     </Routes>
   )

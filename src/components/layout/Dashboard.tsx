@@ -5,6 +5,7 @@ import {
   Shield,
   ArrowRight,
   Route,
+  Terminal,
 } from 'lucide-react'
 
 const tools = [
@@ -35,6 +36,13 @@ const tools = [
     href: '/path-tracer',
     icon: Route,
     features: ['L3 traceroute', 'NetBox integration', 'RTT metrics', 'Device lookup'],
+  },
+  {
+    name: 'Capture Builder',
+    description: 'Generate packet capture commands for tcpdump, Fortinet, Palo Alto, and Cisco ASA devices.',
+    href: '/capture-builder',
+    icon: Terminal,
+    features: ['Multi-platform', 'Visual filter builder', 'Command workflows', 'Cheat sheet'],
   },
 ]
 
