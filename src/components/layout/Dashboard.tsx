@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Route,
   Terminal,
+  Gauge,
 } from 'lucide-react'
 
 const tools = [
@@ -43,6 +44,13 @@ const tools = [
     href: '/capture-builder',
     icon: Terminal,
     features: ['Multi-platform', 'Visual filter builder', 'Command workflows', 'Cheat sheet'],
+  },
+  {
+    name: 'iPerf Server',
+    description: 'Run an iperf3 server for bandwidth testing with real-time monitoring, live graphs, and test history.',
+    href: '/iperf-server',
+    icon: Gauge,
+    features: ['Real-time graphs', 'WebSocket updates', 'Test history', 'CSV/JSON export'],
   },
 ]
 
