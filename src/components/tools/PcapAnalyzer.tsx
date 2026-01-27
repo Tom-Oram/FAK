@@ -181,7 +181,7 @@ export default function PcapAnalyzer() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">PCAP Analyzer</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">PCAP Analyzer</h1>
           <p className="mt-1 text-slate-600">
             Upload a packet capture file to identify issues and get actionable recommendations
           </p>
@@ -226,7 +226,7 @@ export default function PcapAnalyzer() {
                   <FileSearch className="w-8 h-8 text-primary-600 animate-pulse" />
                 </div>
                 <div>
-                  <p className="text-lg font-medium text-slate-900">Analyzing capture file...</p>
+                  <p className="text-lg font-medium text-slate-900 dark:text-white">Analyzing capture file...</p>
                   <p className="text-slate-500 mt-1">Parsing packets and detecting patterns</p>
                 </div>
               </>
@@ -236,7 +236,7 @@ export default function PcapAnalyzer() {
                   <Upload className="w-8 h-8 text-slate-400" />
                 </div>
                 <div>
-                  <p className="text-lg font-medium text-slate-900">
+                  <p className="text-lg font-medium text-slate-900 dark:text-white">
                     Drop your PCAP file here, or{' '}
                     <label
                       htmlFor="file-input"
@@ -574,10 +574,10 @@ function ConnectionsPanel({
           <tbody className="divide-y divide-slate-200">
             {sortedConnections.slice(0, 50).map((conn, i) => (
               <tr key={i} className="hover:bg-slate-50">
-                <td className="px-4 py-3 text-sm font-mono text-slate-900">
+                <td className="px-4 py-3 text-sm font-mono text-slate-900 dark:text-white">
                   {conn.srcIp}:{conn.srcPort}
                 </td>
-                <td className="px-4 py-3 text-sm font-mono text-slate-900">
+                <td className="px-4 py-3 text-sm font-mono text-slate-900 dark:text-white">
                   {conn.destIp}:{conn.destPort}
                 </td>
                 <td className="px-4 py-3">
@@ -629,7 +629,7 @@ function ProtocolsPanel({
         {breakdown.map((protocol) => (
           <div key={protocol.protocol}>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium text-slate-900">{protocol.protocol}</span>
+              <span className="text-sm font-medium text-slate-900 dark:text-white">{protocol.protocol}</span>
               <span className="text-sm text-slate-500">
                 {protocol.packetCount.toLocaleString()} packets ({protocol.percentage.toFixed(1)}%)
               </span>
@@ -682,7 +682,7 @@ function DNSPanel({ queries }: { queries: AnalysisResult['dnsQueries'] }) {
           <tbody className="divide-y divide-slate-200">
             {queries.slice(0, 50).map((query, i) => (
               <tr key={i} className="hover:bg-slate-50">
-                <td className="px-4 py-3 text-sm font-mono text-slate-900">{query.domain}</td>
+                <td className="px-4 py-3 text-sm font-mono text-slate-900 dark:text-white">{query.domain}</td>
                 <td className="px-4 py-3 text-sm text-slate-600">{query.count}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-1">
@@ -735,8 +735,8 @@ function TLSPanel({ connections }: { connections: AnalysisResult['tlsConnections
           <tbody className="divide-y divide-slate-200">
             {connections.slice(0, 50).map((conn, i) => (
               <tr key={i} className="hover:bg-slate-50">
-                <td className="px-4 py-3 text-sm font-mono text-slate-900">{conn.clientIp}</td>
-                <td className="px-4 py-3 text-sm font-mono text-slate-900">{conn.serverIp}</td>
+                <td className="px-4 py-3 text-sm font-mono text-slate-900 dark:text-white">{conn.clientIp}</td>
+                <td className="px-4 py-3 text-sm font-mono text-slate-900 dark:text-white">{conn.serverIp}</td>
                 <td className="px-4 py-3 text-sm text-slate-600">{conn.sni || '-'}</td>
                 <td className="px-4 py-3">
                   {conn.version && (

@@ -57,7 +57,7 @@ export default function CaptureBuilder() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Capture Builder</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Capture Builder</h1>
         <p className="text-slate-600 mt-1">
           Generate packet capture commands for different platforms
         </p>

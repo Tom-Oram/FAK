@@ -51,7 +51,7 @@ export default function TestHistory() {
   return (
     <div className="card">
       <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-900">Test History</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Test History</h3>
         <div className="flex items-center gap-2">
           <button onClick={exportCSV} className="btn-secondary text-sm flex items-center gap-1">
             <Download className="w-4 h-4" />
@@ -129,7 +129,7 @@ export default function TestHistory() {
                   <td className="px-4 py-3 font-mono text-slate-700">{result.clientIp}</td>
                   <td className="px-4 py-3 uppercase text-slate-600">{result.protocol}</td>
                   <td className="px-4 py-3 text-slate-600">{result.duration.toFixed(1)}s</td>
-                  <td className="px-4 py-3 font-medium text-slate-900">
+                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">
                     {formatBandwidth(result.avgBandwidth)}
                   </td>
                   <td className="px-4 py-3 text-slate-600">

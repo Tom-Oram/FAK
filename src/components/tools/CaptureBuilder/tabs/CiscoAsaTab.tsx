@@ -167,7 +167,7 @@ export default function CiscoAsaTab() {
       {/* Capture Settings */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-slate-900">Capture Settings</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Capture Settings</h3>
         </div>
         <div className="card-body space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -237,7 +237,7 @@ export default function CiscoAsaTab() {
       {/* Filter Options */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-slate-900">Filter Options</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Filter Options</h3>
         </div>
         <div className="card-body space-y-4">
           <div>
@@ -318,7 +318,7 @@ export default function CiscoAsaTab() {
       {/* Capture Limits */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-slate-900">Capture Limits</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Capture Limits</h3>
         </div>
         <div className="card-body">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -360,7 +360,7 @@ export default function CiscoAsaTab() {
       {/* Troubleshooting Commands */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-slate-900">Include Additional Commands</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Include Additional Commands</h3>
         </div>
         <div className="card-body space-y-4">
           <div className="flex flex-wrap gap-4">

@@ -268,7 +268,7 @@ export default function DnsLookup() {
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">DNS Lookup</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">DNS Lookup</h1>
         <p className="mt-1 text-slate-600">
           Query DNS records from multiple public resolvers and compare results
         </p>
@@ -396,7 +396,7 @@ export default function DnsLookup() {
           <div className="card">
             <div className="card-header flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                   {result.recordType} Records for {result.domain}
                 </h2>
                 <p className="text-sm text-slate-500 mt-0.5">
@@ -458,7 +458,7 @@ export default function DnsLookup() {
                       <AlertCircle className="w-5 h-5 text-danger-600" />
                     )}
                     <div className="text-left">
-                      <span className="font-medium text-slate-900">{serverResult.server}</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{serverResult.server}</span>
                       <span className="text-slate-500 text-sm ml-2">({serverResult.serverIp})</span>
                     </div>
                   </div>

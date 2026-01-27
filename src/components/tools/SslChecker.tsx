@@ -232,7 +232,7 @@ export default function SslChecker() {
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">SSL/TLS Checker</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">SSL/TLS Checker</h1>
         <p className="mt-1 text-slate-600">
           Verify SSL/TLS connectivity and get security recommendations for your certificates
         </p>
@@ -376,7 +376,7 @@ export default function SslChecker() {
                 onClick={() => toggleSection('checks')}
                 className="w-full card-header flex items-center justify-between hover:bg-slate-50 transition-colors"
               >
-                <h3 className="font-semibold text-slate-900">Security Checks & Recommendations</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white">Security Checks & Recommendations</h3>
                 {expandedSections.has('checks') ? (
                   <ChevronDown className="w-5 h-5 text-slate-400" />
                 ) : (
@@ -409,7 +409,7 @@ export default function SslChecker() {
                           <Info className="w-5 h-5 text-slate-600 flex-shrink-0 mt-0.5" />
                         )}
                         <div>
-                          <p className="font-medium text-slate-900">{check.name}</p>
+                          <p className="font-medium text-slate-900 dark:text-white">{check.name}</p>
                           <p className="text-sm text-slate-700 mt-0.5">{check.message}</p>
                           {check.details && (
                             <p className="text-xs text-slate-500 mt-1">{check.details}</p>
@@ -444,7 +444,7 @@ export default function SslChecker() {
                       <Shield className="w-5 h-5 text-primary-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-slate-900">SSL Labs</p>
+                      <p className="font-medium text-slate-900 dark:text-white">SSL Labs</p>
                       <p className="text-xs text-slate-500">Complete TLS/SSL analysis</p>
                     </div>
                     <ExternalLink className="w-4 h-4 text-slate-400" />
@@ -462,7 +462,7 @@ export default function SslChecker() {
                       <Search className="w-5 h-5 text-primary-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-slate-900">Certificate Search</p>
+                      <p className="font-medium text-slate-900 dark:text-white">Certificate Search</p>
                       <p className="text-xs text-slate-500">CT logs & certificate history</p>
                     </div>
                     <ExternalLink className="w-4 h-4 text-slate-400" />
@@ -482,7 +482,7 @@ export default function SslChecker() {
                       <Globe className="w-5 h-5 text-primary-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-slate-900">Security Headers</p>
+                      <p className="font-medium text-slate-900 dark:text-white">Security Headers</p>
                       <p className="text-xs text-slate-500">HTTP security header analysis</p>
                     </div>
                     <ExternalLink className="w-4 h-4 text-slate-400" />
@@ -500,7 +500,7 @@ export default function SslChecker() {
                       <Key className="w-5 h-5 text-primary-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-slate-900">Client Test</p>
+                      <p className="font-medium text-slate-900 dark:text-white">Client Test</p>
                       <p className="text-xs text-slate-500">Check your browser's TLS support</p>
                     </div>
                     <ExternalLink className="w-4 h-4 text-slate-400" />

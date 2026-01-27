@@ -54,7 +54,7 @@ export default function CommandOutput({ steps, title = 'Generated Commands' }: C
   return (
     <div className="card">
       <div className="card-header flex items-center justify-between">
-        <h3 className="font-semibold text-slate-900">{title}</h3>
+        <h3 className="font-semibold text-slate-900 dark:text-white">{title}</h3>
         <button
           onClick={() => copyToClipboard(getAllCommands(), 'all')}
           className="btn-secondary text-sm flex items-center gap-2"

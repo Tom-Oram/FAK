@@ -20,7 +20,7 @@ export default function ConnectionLog({ events }: ConnectionLogProps) {
   return (
     <div className="card">
       <div className="p-4 border-b border-slate-100">
-        <h3 className="text-lg font-semibold text-slate-900">Connection Log</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Connection Log</h3>
       </div>
 
       <div ref={logRef} className="p-4 h-64 overflow-y-auto space-y-2">

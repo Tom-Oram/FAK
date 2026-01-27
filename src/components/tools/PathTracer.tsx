@@ -202,7 +202,7 @@ export default function PathTracer() {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Path Tracer</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Path Tracer</h1>
         <p className="mt-1 text-slate-600">
           Layer 3 hop-by-hop path discovery with NetBox device lookup
         </p>
@@ -211,7 +211,7 @@ export default function PathTracer() {
       {/* Settings Panel */}
       <div className="card">
         <div className="card-header flex items-center justify-between">
-          <h2 className="font-semibold text-slate-900">Configuration</h2>
+          <h2 className="font-semibold text-slate-900 dark:text-white">Configuration</h2>
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="text-sm text-primary-600 hover:text-primary-700"
@@ -412,7 +412,7 @@ export default function PathTracer() {
             <div className="flex items-center gap-3">
               <Route className="w-5 h-5 text-primary-600" />
               <div>
-                <h2 className="font-semibold text-slate-900">Path Trace Results</h2>
+                <h2 className="font-semibold text-slate-900 dark:text-white">Path Trace Results</h2>
                 <p className="text-xs text-slate-500">
                   {traceResult.sourceIp} → {traceResult.destinationIp}
                 </p>
@@ -463,7 +463,7 @@ export default function PathTracer() {
 
                         {/* Hop Number */}
                         <div className="flex items-center gap-2 min-w-[3rem]">
-                          <span className="text-sm font-medium text-slate-900">
+                          <span className="text-sm font-medium text-slate-900 dark:text-white">
                             {isICMPHop(hop) ? `Hop ${hop.ttl}` : `Hop ${hop.sequence}`}
                           </span>
                         </div>
@@ -473,7 +473,7 @@ export default function PathTracer() {
                           {isICMPHop(hop) ? (
                             /* ICMP Hop Display */
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-sm text-slate-900">
+                              <span className="font-mono text-sm text-slate-900 dark:text-white">
                                 {hop.timeout ? '*' : hop.ip}
                               </span>
                               {hop.hostname && (
@@ -488,7 +488,7 @@ export default function PathTracer() {
                           ) : isDeviceHop(hop) ? (
                             /* Device-Based Hop Display */
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-semibold text-sm text-slate-900">
+                              <span className="font-semibold text-sm text-slate-900 dark:text-white">
                                 {hop.device.hostname}
                               </span>
                               <span className="font-mono text-xs text-slate-500">

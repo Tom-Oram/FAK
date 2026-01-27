@@ -22,7 +22,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full p-4 flex items-center justify-between text-left"
       >
-        <h3 className="text-lg font-semibold text-slate-900">Configuration</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Configuration</h3>
         {isExpanded ? (
           <ChevronDown className="w-5 h-5 text-slate-500" />
         ) : (

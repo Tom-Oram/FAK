@@ -144,7 +144,7 @@ export default function PaloAltoTab() {
       {/* Capture Filter Section */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-slate-900">Capture Filter</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Capture Filter</h3>
         </div>
         <div className="card-body space-y-4">
           <div>
@@ -229,7 +229,7 @@ export default function PaloAltoTab() {
       {/* Capture Stages */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-slate-900">Capture Stages</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Capture Stages</h3>
         </div>
         <div className="card-body">
           <div className="flex flex-wrap gap-4">
@@ -256,7 +256,7 @@ export default function PaloAltoTab() {
       {/* Troubleshooting Commands */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-slate-900">Include Additional Commands</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Include Additional Commands</h3>
         </div>
         <div className="card-body">
           <div className="flex flex-wrap gap-4">
@@ -288,7 +288,7 @@ export default function PaloAltoTab() {
           onClick={() => setShowGuiSteps(!showGuiSteps)}
           className="w-full card-header flex items-center justify-between hover:bg-slate-50 transition-colors"
         >
-          <h3 className="font-semibold text-slate-900">GUI Steps</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">GUI Steps</h3>
           {showGuiSteps ? (
             <ChevronDown className="w-5 h-5 text-slate-400" />
           ) : (

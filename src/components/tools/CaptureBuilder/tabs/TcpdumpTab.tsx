@@ -31,7 +31,7 @@ function CollapsibleSection({ title, summary, defaultOpen = true, children }: Co
           ) : (
             <ChevronRight className="w-4 h-4 text-slate-400" />
           )}
-          <span className="font-medium text-slate-900">{title}</span>
+          <span className="font-medium text-slate-900 dark:text-white">{title}</span>
         </div>
         {!isOpen && summary && <span className="text-sm text-slate-500">{summary}</span>}
       </button>

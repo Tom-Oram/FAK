@@ -88,7 +88,7 @@ export default function CheatSheet({ activeTab, onUseFilter }: CheatSheetProps) 
       >
         <div className="flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-primary-600" />
-          <span className="font-semibold text-slate-900">Cheat Sheet - {content.title}</span>
+          <span className="font-semibold text-slate-900 dark:text-white">Cheat Sheet - {content.title}</span>
         </div>
         {isOpen ? (
           <ChevronDown className="w-5 h-5 text-slate-400" />

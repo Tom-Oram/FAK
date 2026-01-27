@@ -35,7 +35,7 @@ export default function ServerControls({
       <div className="card-body space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h3 className="text-lg font-semibold text-slate-900">Server Control</h3>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Server Control</h3>
             <StatusBadge status={status} isConnected={isConnected} />
           </div>
 

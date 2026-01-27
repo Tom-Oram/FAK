@@ -181,7 +181,7 @@ export default function FortinetTab() {
       {/* Packet Sniffer Section */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-slate-900">Packet Sniffer</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Packet Sniffer</h3>
         </div>
         <div className="card-body space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -260,7 +260,7 @@ export default function FortinetTab() {
       {/* Debug Flow Section */}
       <div className="card">
         <div className="card-header flex items-center justify-between">
-          <h3 className="font-semibold text-slate-900">Debug Flow (Policy Tracing)</h3>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Debug Flow (Policy Tracing)</h3>
           <label className="flex items-center gap-2">
             <input
               type="checkbox"

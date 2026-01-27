@@ -30,7 +30,7 @@ export default function LiveGraph({ data, onClear }: LiveGraphProps) {
   return (
     <div className="card">
       <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-900">Live Bandwidth</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Live Bandwidth</h3>
         <button
           onClick={onClear}
           className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
@@ -81,7 +81,7 @@ export default function LiveGraph({ data, onClear }: LiveGraphProps) {
                   if (active && payload && payload.length) {
                     return (
                       <div className="bg-white border border-slate-200 rounded shadow-lg p-2">
-                        <p className="text-sm font-medium text-slate-900">
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">
                           {formatBandwidth(payload[0].value as number)}
                         </p>
                       </div>
