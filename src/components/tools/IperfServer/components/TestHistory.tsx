@@ -147,6 +147,12 @@ export default function TestHistory() {
                   Loading...
                 </td>
               </tr>
+            ) : fetchError ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-red-500 dark:text-red-400">
+                  Failed to load history: {fetchError}
+                </td>
+              </tr>
             ) : results.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
