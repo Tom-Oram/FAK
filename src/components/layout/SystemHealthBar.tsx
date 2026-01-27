@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Server, Wifi, Activity } from 'lucide-react'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+
 interface ServiceStatus {
   name: string
   status: 'online' | 'offline' | 'connecting'
@@ -17,59 +19,67 @@ export default function SystemHealthBar() {
   ])
 
   useEffect(() => {
-    // Check backend API
-    const checkBackend = async () => {
+    const abortController = new AbortController()
+
+    // Check both services and update state in a single operation to avoid race conditions
+    const checkServices = async () => {
+      let backendStatus: 'online' | 'offline' = 'offline'
+      let iperfStatus: 'online' | 'offline' = 'offline'
+      let iperfDetail: string | undefined = 'Unavailable'
+
+      // Check backend API
       try {
-        const res = await fetch('http://localhost:8080/health', {
+        const res = await fetch(`${API_BASE_URL}/health`, {
           method: 'GET',
-          signal: AbortSignal.timeout(3000)
+          signal: abortController.signal
         })
         if (res.ok) {
-          setServices(prev => prev.map(s =>
-            s.name === 'Backend API' ? { ...s, status: 'online' } : s
-          ))
-        } else {
-          setServices(prev => prev.map(s =>
-            s.name === 'Backend API' ? { ...s, status: 'offline' } : s
-          ))
+          backendStatus = 'online'
         }
       } catch {
-        setServices(prev => prev.map(s =>
-          s.name === 'Backend API' ? { ...s, status: 'offline' } : s
-        ))
+        // Keep offline status
       }
-    }
 
-    // Check iPerf status
-    const checkIperf = async () => {
+      // Check iPerf status
       try {
-        const res = await fetch('http://localhost:8080/api/status', {
-          signal: AbortSignal.timeout(3000)
+        const res = await fetch(`${API_BASE_URL}/api/status`, {
+          signal: abortController.signal
         })
         if (res.ok) {
-          const data = await res.json()
-          setServices(prev => prev.map(s =>
-            s.name === 'iPerf Server'
-              ? { ...s, status: 'online', detail: data.status === 'running' ? `Running on :${data.config?.port || 5201}` : 'Stopped' }
-              : s
-          ))
+          try {
+            const data = await res.json()
+            iperfStatus = 'online'
+            iperfDetail = data.status === 'running' ? `Running on :${data.config?.port || 5201}` : 'Stopped'
+          } catch {
+            // JSON parse error - keep offline status
+          }
         }
       } catch {
-        setServices(prev => prev.map(s =>
-          s.name === 'iPerf Server' ? { ...s, status: 'offline', detail: 'Unavailable' } : s
-        ))
+        // Keep offline status
+      }
+
+      // Single state update to avoid race conditions
+      if (!abortController.signal.aborted) {
+        setServices(prev => prev.map(s => {
+          if (s.name === 'Backend API') {
+            return { ...s, status: backendStatus }
+          }
+          if (s.name === 'iPerf Server') {
+            return { ...s, status: iperfStatus, detail: iperfDetail }
+          }
+          return s
+        }))
       }
     }
 
-    checkBackend()
-    checkIperf()
+    checkServices()
 
-    const interval = setInterval(() => {
-      checkBackend()
-      checkIperf()
-    }, 30000)
+    const interval = setInterval(checkServices, 30000)
 
-    return () => clearInterval(interval)
+    return () => {
+      abortController.abort()
+      clearInterval(interval)
+    }
   }, [])
 
   const getIcon = (name: string) => {
@@ -80,11 +90,12 @@ export default function SystemHealthBar() {
     }
   }
 
-  const getStatusColor = (status: ServiceStatus['status']) => {
+  const getStatusColor = (status: ServiceStatus['status']): string => {
     switch (status) {
       case 'online': return 'bg-success-500'
       case 'offline': return 'bg-danger-500'
       case 'connecting': return 'bg-warning-500 animate-pulse'
+      default: return 'bg-slate-500'
     }
   }
 
