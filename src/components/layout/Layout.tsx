@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from '../ui'
+import { useTheme } from '../../hooks'
 
 const SIDEBAR_STORAGE_KEY = 'fak-sidebar-collapsed'
 
@@ -42,10 +43,25 @@ export default function Layout() {
     if (typeof window === 'undefined') return false
     return localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true'
   })
+  const { toggleTheme } = useTheme()
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(collapsed))
   }, [collapsed])
+
+  // Keyboard shortcut for theme toggle (Ctrl/Cmd + D)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + D for theme toggle
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault()
+        toggleTheme()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [toggleTheme])
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
