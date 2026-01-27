@@ -11,7 +11,6 @@ import {
   Info,
   ChevronDown,
   ChevronRight,
-  Network,
   Activity,
 } from 'lucide-react';
 
