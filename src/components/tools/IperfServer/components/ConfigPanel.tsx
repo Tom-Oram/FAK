@@ -15,7 +15,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
   // Ensure config has all required properties with defaults
   const safeConfig: ServerConfig = {
     port: config?.port ?? 5201,
-    bindAddress: config?.bindAddress ?? '0.0.0.0',
+    bindAddress: '0.0.0.0', // Always bind to all interfaces
     protocol: config?.protocol ?? 'tcp',
     oneOff: config?.oneOff ?? false,
     idleTimeout: config?.idleTimeout ?? 300,
@@ -42,7 +42,7 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
 
       {isExpanded && (
         <div className="card-body border-t border-slate-100 dark:border-slate-800 space-y-4">
-          {/* Port and Bind Address */}
+          {/* Port and Protocol */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -60,49 +60,34 @@ export default function ConfigPanel({ config, onChange, disabled }: ConfigPanelP
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Bind Address
+                Protocol
               </label>
-              <input
-                type="text"
-                value={safeConfig.bindAddress}
-                onChange={(e) => updateConfig({ bindAddress: e.target.value })}
-                disabled={disabled}
-                placeholder="0.0.0.0"
-                className="input w-full"
-              />
-            </div>
-          </div>
-
-          {/* Protocol */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-              Protocol
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="protocol"
-                  value="tcp"
-                  checked={safeConfig.protocol === 'tcp'}
-                  onChange={() => updateConfig({ protocol: 'tcp' as Protocol })}
-                  disabled={disabled}
-                  className="text-primary-600"
-                />
-                <span className="text-sm text-slate-700 dark:text-slate-300">TCP</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="protocol"
-                  value="udp"
-                  checked={safeConfig.protocol === 'udp'}
-                  onChange={() => updateConfig({ protocol: 'udp' as Protocol })}
-                  disabled={disabled}
-                  className="text-primary-600"
-                />
-                <span className="text-sm text-slate-700 dark:text-slate-300">UDP</span>
-              </label>
+              <div className="flex gap-4 h-[42px] items-center">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="protocol"
+                    value="tcp"
+                    checked={safeConfig.protocol === 'tcp'}
+                    onChange={() => updateConfig({ protocol: 'tcp' as Protocol })}
+                    disabled={disabled}
+                    className="text-primary-600"
+                  />
+                  <span className="text-sm text-slate-700 dark:text-slate-300">TCP</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="protocol"
+                    value="udp"
+                    checked={safeConfig.protocol === 'udp'}
+                    onChange={() => updateConfig({ protocol: 'udp' as Protocol })}
+                    disabled={disabled}
+                    className="text-primary-600"
+                  />
+                  <span className="text-sm text-slate-700 dark:text-slate-300">UDP</span>
+                </label>
+              </div>
             </div>
           </div>
 
