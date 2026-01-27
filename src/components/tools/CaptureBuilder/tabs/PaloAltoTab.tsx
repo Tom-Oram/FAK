@@ -154,7 +154,7 @@ export default function PaloAltoTab() {
               value={options.filterName}
               onChange={(e) => updateOption('filterName', e.target.value)}
               placeholder="capture1"
-              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -165,7 +165,7 @@ export default function PaloAltoTab() {
                 value={options.sourceIp}
                 onChange={(e) => updateOption('sourceIp', e.target.value)}
                 placeholder="10.0.0.1"
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
             <div>
@@ -175,7 +175,7 @@ export default function PaloAltoTab() {
                 value={options.destIp}
                 onChange={(e) => updateOption('destIp', e.target.value)}
                 placeholder="10.0.0.2"
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
             <div>
@@ -185,7 +185,7 @@ export default function PaloAltoTab() {
                 value={options.sourcePort}
                 onChange={(e) => updateOption('sourcePort', e.target.value)}
                 placeholder="Any"
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
             <div>
@@ -195,7 +195,7 @@ export default function PaloAltoTab() {
                 value={options.destPort}
                 onChange={(e) => updateOption('destPort', e.target.value)}
                 placeholder="443"
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
             <div>
@@ -203,7 +203,7 @@ export default function PaloAltoTab() {
               <select
                 value={options.protocol}
                 onChange={(e) => updateOption('protocol', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
               >
                 {PALOALTO_PROTOCOLS.map((p) => (
                   <option key={p.value} value={p.value}>
@@ -219,7 +219,7 @@ export default function PaloAltoTab() {
                 value={options.fileName}
                 onChange={(e) => updateOption('fileName', e.target.value)}
                 placeholder="capture.pcap"
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
           </div>
@@ -300,7 +300,7 @@ export default function PaloAltoTab() {
             <ol className="space-y-2">
               {guiSteps.map((step) => (
                 <li key={step.step} className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center text-sm font-medium">
+                  <span className="flex-shrink-0 w-6 h-6 bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 rounded-full flex items-center justify-center text-sm font-medium">
                     {step.step}
                   </span>
                   <span className="text-sm text-slate-700 dark:text-slate-300">{step.text}</span>

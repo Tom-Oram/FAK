@@ -76,12 +76,12 @@ export default function CommandOutput({ steps, title = 'Generated Commands' }: C
         {steps.map((step, index) => (
           <div key={index} className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Step {step.step}: {step.title}
               </span>
               <button
                 onClick={() => copyToClipboard(step.command, index)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors"
                 title="Copy command"
               >
                 {copiedIndex === index ? (
@@ -91,15 +91,15 @@ export default function CommandOutput({ steps, title = 'Generated Commands' }: C
                 )}
               </button>
             </div>
-            <div className="bg-slate-900 rounded-lg p-3 font-mono text-sm text-slate-100 overflow-x-auto">
+            <div className="bg-slate-900 rounded-lg p-3 font-mono text-sm text-slate-100 overflow-x-auto border border-slate-700">
               {step.command}
             </div>
-            <p className="text-xs text-slate-500">{step.explanation}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{step.explanation}</p>
             {step.flags && step.flags.length > 0 && (
               <div>
                 <button
                   onClick={() => toggleFlags(index)}
-                  className="flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700"
+                  className="flex items-center gap-1 text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
                 >
                   {showFlags.has(index) ? (
                     <ChevronDown className="w-3 h-3" />
@@ -109,11 +109,11 @@ export default function CommandOutput({ steps, title = 'Generated Commands' }: C
                   Show what each flag does
                 </button>
                 {showFlags.has(index) && (
-                  <div className="mt-2 p-2 bg-slate-50 rounded text-xs space-y-1">
+                  <div className="mt-2 p-2 bg-slate-50 dark:bg-slate-800 rounded text-xs space-y-1 border border-slate-200 dark:border-slate-700">
                     {step.flags.map((flag, i) => (
                       <div key={i} className="flex gap-2">
-                        <code className="font-mono text-primary-600">{flag.flag}</code>
-                        <span className="text-slate-600">→ {flag.description}</span>
+                        <code className="font-mono text-primary-600 dark:text-primary-400">{flag.flag}</code>
+                        <span className="text-slate-600 dark:text-slate-400">→ {flag.description}</span>
                       </div>
                     ))}
                   </div>

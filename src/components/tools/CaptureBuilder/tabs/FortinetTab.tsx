@@ -205,7 +205,7 @@ export default function FortinetTab() {
                   value={options.customInterface}
                   onChange={(e) => updateOption('customInterface', e.target.value)}
                   placeholder="Enter interface name"
-                  className="mt-2 w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+                  className="mt-2 w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               )}
             </div>
@@ -216,7 +216,7 @@ export default function FortinetTab() {
                 value={options.packetCount}
                 onChange={(e) => updateOption('packetCount', e.target.value)}
                 placeholder="0 = unlimited"
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
           </div>
@@ -228,10 +228,10 @@ export default function FortinetTab() {
                 <button
                   key={v}
                   onClick={() => updateOption('verbosity', v)}
-                  className={`px-3 py-1.5 text-sm rounded-lg border ${
+                  className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
                     options.verbosity === v
                       ? 'bg-primary-600 text-white border-primary-600'
-                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
                   }`}
                 >
                   {v}
@@ -280,7 +280,7 @@ export default function FortinetTab() {
                 value={options.debugFlowAddress}
                 onChange={(e) => updateOption('debugFlowAddress', e.target.value)}
                 placeholder="10.0.0.1 (optional)"
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
             <label className="flex items-center gap-2">

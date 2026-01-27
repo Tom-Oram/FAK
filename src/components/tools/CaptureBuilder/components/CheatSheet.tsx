@@ -84,7 +84,7 @@ export default function CheatSheet({ activeTab, onUseFilter }: CheatSheetProps) 
     <div className="card">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full card-header flex items-center justify-between hover:bg-slate-50 transition-colors"
+        className="w-full card-header flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
       >
         <div className="flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-primary-600" />
@@ -98,25 +98,25 @@ export default function CheatSheet({ activeTab, onUseFilter }: CheatSheetProps) 
       </button>
 
       {isOpen && (
-        <div className="card-body border-t border-slate-200">
+        <div className="card-body border-t border-slate-200 dark:border-slate-700">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {content.filters.length > 0 && (
               <div>
-                <h4 className="font-medium text-slate-700 mb-3">Common Filters</h4>
+                <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-3">Common Filters</h4>
                 <div className="space-y-2">
                   {content.filters.map((item, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between p-2 bg-slate-50 rounded text-sm"
+                      className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 rounded text-sm"
                     >
                       <div>
-                        <code className="font-mono text-primary-600">{item.syntax}</code>
-                        <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                        <code className="font-mono text-primary-600 dark:text-primary-400">{item.syntax}</code>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{item.description}</p>
                       </div>
                       {onUseFilter && (
                         <button
                           onClick={() => onUseFilter(item.syntax)}
-                          className="text-xs text-primary-600 hover:text-primary-700 px-2 py-1 bg-white rounded border border-slate-200"
+                          className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 px-2 py-1 bg-white dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600"
                         >
                           Use
                         </button>
@@ -128,14 +128,14 @@ export default function CheatSheet({ activeTab, onUseFilter }: CheatSheetProps) 
             )}
 
             <div>
-              <h4 className="font-medium text-slate-700 mb-3">
+              <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-3">
                 {activeTab === 'tcpdump' ? 'Common Flags' : 'Quick Reference'}
               </h4>
               <div className="space-y-2">
                 {content.tips.map((item, i) => (
-                  <div key={i} className="p-2 bg-slate-50 rounded text-sm">
-                    <code className="font-mono text-primary-600">{item.syntax}</code>
-                    <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                  <div key={i} className="p-2 bg-slate-50 dark:bg-slate-800 rounded text-sm">
+                    <code className="font-mono text-primary-600 dark:text-primary-400">{item.syntax}</code>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{item.description}</p>
                   </div>
                 ))}
               </div>

@@ -58,13 +58,13 @@ export default function CaptureBuilder() {
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Capture Builder</h1>
-        <p className="text-slate-600 mt-1">
+        <p className="text-slate-600 dark:text-slate-400 mt-1">
           Generate packet capture commands for different platforms
         </p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-slate-200 mb-6">
+      <div className="border-b border-slate-200 dark:border-slate-700 mb-6">
         <nav className="flex gap-1 -mb-px">
           {TABS.map((tab) => (
             <button
@@ -74,8 +74,8 @@ export default function CaptureBuilder() {
                 flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors
                 ${
                   activeTab === tab.id
-                    ? 'border-primary-600 text-primary-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                    ? 'border-primary-600 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
                 }
               `}
               title={tab.description}

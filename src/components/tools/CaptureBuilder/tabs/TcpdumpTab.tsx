@@ -275,7 +275,7 @@ export default function TcpdumpTab() {
             <select
               value={options.interface}
               onChange={(e) => updateOption('interface', e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             >
               {COMMON_INTERFACES.map((iface) => (
                 <option key={iface.value} value={iface.value}>
@@ -290,7 +290,7 @@ export default function TcpdumpTab() {
                 value={options.customInterface}
                 onChange={(e) => updateOption('customInterface', e.target.value)}
                 placeholder="Enter interface name"
-                className="mt-2 w-full px-3 py-2 border border-slate-300 rounded-lg"
+                className="mt-2 w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             )}
           </div>
@@ -301,7 +301,7 @@ export default function TcpdumpTab() {
               value={options.packetCount}
               onChange={(e) => updateOption('packetCount', e.target.value)}
               placeholder="Unlimited"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
           <div>
@@ -311,7 +311,7 @@ export default function TcpdumpTab() {
               value={options.snaplen}
               onChange={(e) => updateOption('snaplen', e.target.value)}
               placeholder="262144 (default)"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">0 = capture full packets</p>
           </div>
@@ -350,10 +350,10 @@ export default function TcpdumpTab() {
                 <button
                   key={v || 'normal'}
                   onClick={() => updateOption('verbosity', v)}
-                  className={`px-3 py-1.5 text-sm rounded-lg border ${
+                  className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
                     options.verbosity === v
                       ? 'bg-primary-600 text-white border-primary-600'
-                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
                   }`}
                 >
                   {v || 'Normal'}
@@ -368,10 +368,10 @@ export default function TcpdumpTab() {
                 <button
                   key={h || 'none'}
                   onClick={() => updateOption('hexOutput', h)}
-                  className={`px-3 py-1.5 text-sm rounded-lg border ${
+                  className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
                     options.hexOutput === h
                       ? 'bg-primary-600 text-white border-primary-600'
-                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
                   }`}
                 >
                   {h || 'None'}
@@ -418,10 +418,10 @@ export default function TcpdumpTab() {
             <button
               key={ts.value || 'default'}
               onClick={() => updateOption('timestamp', ts.value)}
-              className={`px-3 py-1.5 text-sm rounded-lg border ${
+              className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
                 options.timestamp === ts.value
                   ? 'bg-primary-600 text-white border-primary-600'
-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
               {ts.label}
@@ -443,7 +443,7 @@ export default function TcpdumpTab() {
               value={options.writeFile}
               onChange={(e) => updateOption('writeFile', e.target.value)}
               placeholder="capture.pcap"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
           <div>
@@ -453,7 +453,7 @@ export default function TcpdumpTab() {
               value={options.readFile}
               onChange={(e) => updateOption('readFile', e.target.value)}
               placeholder="existing.pcap"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
         </div>
@@ -462,33 +462,33 @@ export default function TcpdumpTab() {
             <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">File Rotation</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm text-slate-600 mb-1">Size MB (-C)</label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">Size MB (-C)</label>
                 <input
                   type="number"
                   value={options.rotateSize}
                   onChange={(e) => updateOption('rotateSize', e.target.value)}
                   placeholder="100"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-600 mb-1">Seconds (-G)</label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">Seconds (-G)</label>
                 <input
                   type="number"
                   value={options.rotateSeconds}
                   onChange={(e) => updateOption('rotateSeconds', e.target.value)}
                   placeholder="3600"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-600 mb-1">File count (-W)</label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">File count (-W)</label>
                 <input
                   type="number"
                   value={options.rotateCount}
                   onChange={(e) => updateOption('rotateCount', e.target.value)}
                   placeholder="10"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
             </div>
