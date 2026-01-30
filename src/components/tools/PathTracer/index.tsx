@@ -13,75 +13,8 @@ import {
   ChevronRight,
   Activity,
 } from 'lucide-react';
-
-// ICMP Hop (legacy)
-interface ICMPHop {
-  ttl: number;
-  ip: string;
-  hostname?: string;
-  rtt: number;
-  device?: NetBoxDevice;
-  asn?: string;
-  timeout?: boolean;
-}
-
-// Device-based Hop (new)
-interface DeviceHop {
-  sequence: number;
-  device: {
-    hostname: string;
-    management_ip: string;
-    vendor: string;
-    device_type: string;
-    site?: string;
-    netbox?: NetBoxDevice;
-  };
-  egress_interface?: string;
-  logical_context: string;
-  lookup_time_ms: number;
-  route?: {
-    destination: string;
-    next_hop: string;
-    next_hop_type: string;
-    protocol: string;
-    metric: number;
-    preference: number;
-  };
-}
-
-interface NetBoxDevice {
-  name: string;
-  site?: string;
-  role?: string;
-  platform?: string;
-  status?: string;
-}
-
-interface DeviceCandidate {
-  hostname: string;
-  management_ip: string;
-  site?: string;
-  vendor: string;
-}
-
-interface TraceResult {
-  mode: 'icmp' | 'device-based';
-  sourceIp: string;
-  destinationIp: string;
-  hops: ICMPHop[] | DeviceHop[];
-  startTime: Date;
-  endTime?: Date;
-  status: 'running' | 'complete' | 'error' | 'needs_input' | 'ambiguous_hop' | string;
-  error?: string;
-  // Device-based specific fields
-  hop_count?: number;
-  total_time_ms?: number;
-  error_message?: string;
-  // Disambiguation fields
-  candidates?: DeviceCandidate[];
-  ambiguous_hop_sequence?: number;
-  inventory_warnings?: string[];
-}
+import type { ICMPHop, DeviceHop, DeviceCandidate, TraceResult } from './types';
+import { PathDiagram } from './diagram';
 
 export default function PathTracer() {
   const [sourceIp, setSourceIp] = useState('');
@@ -98,6 +31,8 @@ export default function PathTracer() {
   const [startDevice, setStartDevice] = useState('');
   const [sourceContext, setSourceContext] = useState('');
   const [inventoryFile, setInventoryFile] = useState('');
+  const [protocol, setProtocol] = useState('tcp');
+  const [destinationPort, setDestinationPort] = useState('443');
 
   // Candidate selection state
   const [selectedCandidate, setSelectedCandidate] = useState<DeviceCandidate | null>(null);
@@ -145,6 +80,8 @@ export default function PathTracer() {
         if (startDevice) requestBody.startDevice = startDevice;
         if (sourceContext) requestBody.sourceContext = sourceContext;
         if (inventoryFile) requestBody.inventoryFile = inventoryFile;
+        if (protocol) requestBody.protocol = protocol;
+        if (destinationPort) requestBody.destinationPort = parseInt(destinationPort, 10);
       }
 
       // Call backend API
@@ -204,7 +141,7 @@ export default function PathTracer() {
     } finally {
       setIsTracing(false);
     }
-  }, [sourceIp, destinationIp, netboxUrl, netboxToken, traceMode, startDevice, sourceContext, inventoryFile]);
+  }, [sourceIp, destinationIp, netboxUrl, netboxToken, traceMode, startDevice, sourceContext, inventoryFile, protocol, destinationPort]);
 
   const handleSelectCandidate = useCallback((candidate: DeviceCandidate) => {
     if (traceResult?.status === 'needs_input') {
@@ -404,7 +341,7 @@ export default function PathTracer() {
             <div className="space-y-4 pt-4 border-t border-slate-200">
               {/* Device-Based Options */}
               {traceMode === 'device-based' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Start Device (Optional)
@@ -446,6 +383,36 @@ export default function PathTracer() {
                       disabled={isTracing}
                     />
                     <p className="text-xs text-slate-500 mt-1">Path to inventory file</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Protocol (Optional)
+                    </label>
+                    <select
+                      value={protocol}
+                      onChange={(e) => setProtocol(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                      disabled={isTracing}
+                    >
+                      <option value="tcp">TCP</option>
+                      <option value="udp">UDP</option>
+                      <option value="icmp">ICMP</option>
+                    </select>
+                    <p className="text-xs text-slate-500 mt-1">For firewall policy lookup</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Dest Port (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={destinationPort}
+                      onChange={(e) => setDestinationPort(e.target.value)}
+                      placeholder="443"
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                      disabled={isTracing}
+                    />
+                    <p className="text-xs text-slate-500 mt-1">For firewall policy lookup</p>
                   </div>
                 </div>
               )}
@@ -633,6 +600,12 @@ export default function PathTracer() {
             )}
 
             {traceResult.hops.length > 0 ? (
+              traceResult.mode === 'device-based' ? (
+                <PathDiagram
+                  hops={traceResult.hops as DeviceHop[]}
+                  totalPathMs={traceResult.total_time_ms || 0}
+                />
+              ) : (
               <div className="space-y-2">
                 {traceResult.hops.map((hop) => {
                   const hopKey = getHopKey(hop);
@@ -830,6 +803,7 @@ export default function PathTracer() {
                   );
                 })}
               </div>
+              )
             ) : traceResult.status === 'running' ? (
               <div className="text-center py-8">
                 <Clock className="w-12 h-12 text-primary-600 animate-spin mx-auto mb-3" />
