@@ -7,6 +7,7 @@ from .paloalto import PaloAltoDriver
 from .aruba import ArubaDriver
 from .cisco_asa import CiscoASADriver
 from .juniper_srx import JuniperSRXDriver
+from .cisco_ftd import CiscoFTDDriver
 
 __all__ = [
     'NetworkDriver',
@@ -16,4 +17,5 @@ __all__ = [
     'ArubaDriver',
     'CiscoASADriver',
     'JuniperSRXDriver',
+    'CiscoFTDDriver',
 ]
