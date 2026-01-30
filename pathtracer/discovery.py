@@ -7,7 +7,7 @@ from typing import List, Optional, Dict
 from pathlib import Path
 
 from .models import NetworkDevice, DeviceNotFoundError
-from .utils.ip_utils import ip_in_network
+from .utils.ip_utils import ip_in_network, get_prefix_length
 
 
 logger = logging.getLogger(__name__)
@@ -53,9 +53,9 @@ class DeviceInventory:
         devices_data = data.get('devices', [])
         for device_data in devices_data:
             device = NetworkDevice(
-                hostname=device_data.get('hostname', ''),
-                management_ip=device_data.get('management_ip', ''),
-                vendor=device_data.get('vendor', ''),
+                hostname=device_data['hostname'],
+                management_ip=device_data['management_ip'],
+                vendor=device_data['vendor'],
                 site=device_data.get('site'),
                 device_type=device_data.get('device_type', 'unknown'),
                 credentials_ref=device_data.get('credentials_ref', 'default'),
@@ -77,7 +77,7 @@ class DeviceInventory:
         """
         # Detect duplicate management IPs
         for existing in self.devices:
-            if existing.management_ip == device.management_ip and existing.hostname != device.hostname:
+            if device.management_ip and existing.management_ip == device.management_ip and existing.hostname != device.hostname:
                 warning = f"Duplicate management IP {device.management_ip}: {existing.hostname} and {device.hostname}"
                 self._load_warnings.append(warning)
                 logger.warning(warning)
@@ -118,8 +118,6 @@ class DeviceInventory:
 
     def find_device_for_subnet(self, ip: str) -> List[NetworkDevice]:
         """Find all devices owning a subnet that contains this IP, using longest prefix match."""
-        from pathtracer.utils.ip_utils import get_prefix_length
-
         matches: List[tuple] = []  # (prefix_length, device)
         for subnet, devices in self.subnet_map.items():
             if ip_in_network(ip, subnet):
