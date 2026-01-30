@@ -11,18 +11,12 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Copy API requirements and install Python dependencies
-COPY api/requirements.txt .
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy pathtracer requirements and install dependencies
-COPY pathtracer/requirements.txt ./pathtracer-requirements.txt
-RUN pip install --no-cache-dir -r pathtracer-requirements.txt
-
 # Copy application code
-COPY api/traceroute.py .
-
-# Copy pathtracer module
+COPY traceroute.py .
 COPY pathtracer ./pathtracer
 
 # Create non-root user

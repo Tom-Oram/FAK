@@ -7,10 +7,8 @@ Requires: scapy, requests, flask, netmiko, pyyaml
 
 import os
 import socket
-import sys
 import time
 from datetime import datetime
-from pathlib import Path
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -23,10 +21,6 @@ CORS(app)  # Enable CORS for frontend access
 # Disable Scapy verbosity
 conf.verb = 0
 
-# Add pathtracer module to Python path
-pathtracer_path = Path(__file__).parent.parent / 'pathtracer'
-if str(pathtracer_path) not in sys.path:
-    sys.path.insert(0, str(pathtracer_path))
 
 # Import pathtracer modules
 try:
@@ -280,7 +274,7 @@ def perform_device_trace(source_ip, destination_ip, inventory_file=None, start_d
         inventory_file = os.getenv('PATHTRACE_INVENTORY', 'inventory.yaml')
         # Try pathtracer directory if not found
         if not os.path.exists(inventory_file):
-            inventory_file = os.path.join(os.path.dirname(__file__), '..', 'pathtracer', 'inventory.yaml')
+            inventory_file = os.path.join(os.path.dirname(__file__), 'pathtracer', 'inventory.yaml')
 
     if not os.path.exists(inventory_file):
         raise FileNotFoundError(f"Inventory file not found: {inventory_file}")
@@ -302,7 +296,7 @@ def perform_device_trace(source_ip, destination_ip, inventory_file=None, start_d
         # Try credentials file
         creds_file = os.getenv('PATHTRACE_CREDENTIALS', 'credentials.yaml')
         if not os.path.exists(creds_file):
-            creds_file = os.path.join(os.path.dirname(__file__), '..', 'pathtracer', 'credentials.yaml')
+            creds_file = os.path.join(os.path.dirname(__file__), 'pathtracer', 'credentials.yaml')
         if os.path.exists(creds_file):
             credentials.load_from_file(creds_file)
 
