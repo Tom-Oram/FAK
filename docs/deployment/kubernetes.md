@@ -1,5 +1,7 @@
 # Kubernetes Deployment
 
+> **Note:** These manifests currently only deploy the frontend (nginx) service. The Python backend and Go iPerf backend are not yet included. For a complete deployment, use Docker Compose instead.
+
 ## Prerequisites
 
 - Kubernetes cluster (1.19+)
