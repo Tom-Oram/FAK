@@ -25,8 +25,16 @@ COPY api/traceroute.py .
 # Copy pathtracer module
 COPY pathtracer ./pathtracer
 
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
 # Expose Flask port
 EXPOSE 5000
 
-# Run as root (required for raw sockets and SSH)
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
+
 CMD ["python", "traceroute.py"]
