@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   Route,
   Play,
@@ -99,6 +99,9 @@ export default function PathTracer() {
   const [sourceContext, setSourceContext] = useState('');
   const [inventoryFile, setInventoryFile] = useState('');
 
+  // Candidate selection state
+  const [selectedCandidate, setSelectedCandidate] = useState<DeviceCandidate | null>(null);
+
   const toggleHop = useCallback((ttl: number) => {
     setExpandedHops(prev => {
       const next = new Set(prev);
@@ -158,6 +161,26 @@ export default function PathTracer() {
 
       const result = await response.json();
 
+      if (result.status === 'needs_input' || result.status === 'ambiguous_hop') {
+        setTraceResult({
+          mode: result.mode || 'device-based',
+          sourceIp: sourceIp,
+          destinationIp: destinationIp,
+          hops: result.hops || [],
+          startTime: new Date(result.startTime),
+          endTime: result.endTime ? new Date(result.endTime) : undefined,
+          status: result.status,
+          error_message: result.error_message,
+          candidates: result.candidates || [],
+          ambiguous_hop_sequence: result.ambiguous_hop_sequence,
+          hop_count: result.hop_count,
+          total_time_ms: result.total_time_ms,
+          inventory_warnings: result.inventory_warnings,
+        });
+        setIsTracing(false);
+        return;
+      }
+
       setTraceResult({
         mode: result.mode || traceMode,
         sourceIp,
@@ -181,6 +204,21 @@ export default function PathTracer() {
       setIsTracing(false);
     }
   }, [sourceIp, destinationIp, netboxUrl, netboxToken, traceMode, startDevice, sourceContext, inventoryFile]);
+
+  const handleSelectCandidate = useCallback((candidate: DeviceCandidate) => {
+    if (traceResult?.status === 'needs_input') {
+      // Source IP ambiguity - set start device and re-trace
+      setStartDevice(candidate.hostname);
+      setSelectedCandidate(candidate);
+    }
+  }, [traceResult]);
+
+  useEffect(() => {
+    if (selectedCandidate && !isTracing) {
+      setSelectedCandidate(null);
+      startTrace();
+    }
+  }, [selectedCandidate, startDevice]);
 
   const getHopColor = (hop: ICMPHop | DeviceHop) => {
     // For ICMP hops, use RTT
@@ -439,6 +477,12 @@ export default function PathTracer() {
             {traceResult.status === 'error' && (
               <span className="badge-danger">Error</span>
             )}
+            {traceResult.status === 'needs_input' && (
+              <span className="badge-warning">Needs Input</span>
+            )}
+            {traceResult.status === 'ambiguous_hop' && (
+              <span className="badge-warning">Ambiguous Hop</span>
+            )}
           </div>
 
           <div className="card-body">
@@ -449,6 +493,68 @@ export default function PathTracer() {
                   <p className="text-sm font-medium text-danger-900">Trace Failed</p>
                   <p className="text-sm text-danger-700 mt-1">{traceResult.error}</p>
                 </div>
+              </div>
+            )}
+
+            {/* Candidate Selection - Source IP ambiguity */}
+            {traceResult.status === 'needs_input' && traceResult.candidates && (
+              <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-warning-800 dark:text-warning-200">
+                    {traceResult.error_message}
+                  </p>
+                </div>
+                {traceResult.candidates.length > 0 ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+                      Select a starting device:
+                    </p>
+                    {traceResult.candidates.map((candidate) => (
+                      <button
+                        key={`${candidate.hostname}-${candidate.site}`}
+                        onClick={() => handleSelectCandidate(candidate)}
+                        className="w-full p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-left transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-slate-900 dark:text-white">
+                              {candidate.hostname}
+                            </p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                              {candidate.management_ip}
+                              {candidate.site && ` • ${candidate.site}`}
+                            </p>
+                          </div>
+                          <span className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded">
+                            {candidate.vendor}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                      No matching devices found. Enter a starting device manually:
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={startDevice}
+                        onChange={(e) => setStartDevice(e.target.value)}
+                        placeholder="hostname"
+                        className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      />
+                      <button
+                        onClick={() => startTrace()}
+                        disabled={!startDevice}
+                        className="btn-primary"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
