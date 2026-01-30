@@ -213,6 +213,61 @@ export default function PathTracer() {
     }
   }, [traceResult]);
 
+  const handleContinueTrace = useCallback(async (candidate: DeviceCandidate) => {
+    if (!traceResult || traceResult.status !== 'ambiguous_hop') return;
+
+    setIsTracing(true);
+
+    try {
+      const response = await fetch('/api/traceroute/device-based', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: sourceIp,
+          destination: destinationIp,
+          startDevice: candidate.hostname,
+          sourceContext: sourceContext,
+          inventoryFile: inventoryFile,
+          netboxUrl: netboxUrl || undefined,
+          netboxToken: netboxToken || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Trace failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Stitch the continuation onto the existing partial path
+      const existingHops = traceResult.hops as DeviceHop[];
+      const continuationHops = (data.hops || []).map((hop: DeviceHop, i: number) => ({
+        ...hop,
+        sequence: existingHops.length + i + 1,
+      }));
+
+      setTraceResult({
+        ...traceResult,
+        hops: [...existingHops, ...continuationHops],
+        status: data.status,
+        error_message: data.error_message,
+        endTime: data.endTime ? new Date(data.endTime) : undefined,
+        hop_count: existingHops.length + (data.hop_count || 0),
+        total_time_ms: (traceResult.total_time_ms || 0) + (data.total_time_ms || 0),
+        candidates: data.candidates,
+        ambiguous_hop_sequence: data.ambiguous_hop_sequence,
+      });
+    } catch (err) {
+      setTraceResult((prev) =>
+        prev
+          ? { ...prev, status: 'error', error: String(err) }
+          : null
+      );
+    } finally {
+      setIsTracing(false);
+    }
+  }, [traceResult, sourceIp, destinationIp, sourceContext, inventoryFile, netboxUrl, netboxToken]);
+
   useEffect(() => {
     if (selectedCandidate && !isTracing) {
       setSelectedCandidate(null);
@@ -496,6 +551,19 @@ export default function PathTracer() {
               </div>
             )}
 
+            {traceResult.inventory_warnings && traceResult.inventory_warnings.length > 0 && (
+              <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-3 mb-4">
+                <p className="text-sm font-medium text-warning-800 dark:text-warning-200 mb-2">
+                  Inventory warnings:
+                </p>
+                <ul className="text-sm text-warning-700 dark:text-warning-300 space-y-1">
+                  {traceResult.inventory_warnings.map((warning, i) => (
+                    <li key={i}>{warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* Candidate Selection - Source IP ambiguity */}
             {traceResult.status === 'needs_input' && traceResult.candidates && (
               <div className="p-4 border-t border-slate-200 dark:border-slate-700">
@@ -614,6 +682,11 @@ export default function PathTracer() {
                                 {hop.device.management_ip}
                               </span>
                               <span className="badge-primary">{hop.device.vendor}</span>
+                              {hop.device.site && (
+                                <span className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full">
+                                  {hop.device.site}
+                                </span>
+                              )}
                               {hop.logical_context !== 'global' && hop.logical_context !== 'default' && (
                                 <span className="badge-warning">{hop.logical_context}</span>
                               )}
@@ -758,6 +831,45 @@ export default function PathTracer() {
                 <p className="text-slate-600">Discovering path...</p>
               </div>
             ) : null}
+
+            {/* Mid-path ambiguity - candidate selection */}
+            {traceResult.status === 'ambiguous_hop' && traceResult.candidates && (
+              <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-warning-800 dark:text-warning-200">
+                    {traceResult.error_message}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+                    Select the next hop device to continue tracing:
+                  </p>
+                  {traceResult.candidates.map((candidate) => (
+                    <button
+                      key={`${candidate.hostname}-${candidate.management_ip}`}
+                      onClick={() => handleContinueTrace(candidate)}
+                      disabled={isTracing}
+                      className="w-full p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-left transition-colors disabled:opacity-50"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-white">
+                            {candidate.hostname}
+                          </p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                            {candidate.management_ip}
+                            {candidate.site && ` • ${candidate.site}`}
+                          </p>
+                        </div>
+                        <span className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded">
+                          {candidate.vendor}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {traceResult.endTime && traceResult.status === 'complete' && (
               <div className="mt-4 pt-4 border-t border-slate-200">
