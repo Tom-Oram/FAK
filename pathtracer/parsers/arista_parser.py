@@ -2,7 +2,7 @@
 
 import re
 from typing import List, Optional
-from ..models import RouteEntry, NextHopType
+from ..models import RouteEntry, NextHopType, InterfaceDetail
 
 
 class AristaParser:
@@ -249,3 +249,168 @@ class AristaParser:
                         interfaces[interface] = ip
 
         return interfaces
+
+    @staticmethod
+    def _parse_rate(value: str, unit: str) -> int:
+        """
+        Convert a rate value and unit string to bits per second.
+
+        Args:
+            value: Numeric rate value (e.g. "2.50", "0")
+            unit: Unit string (e.g. "Gbps", "Mbps", "bps", "bits/sec", "Kbps")
+
+        Returns:
+            Rate in bits per second
+        """
+        multipliers = {
+            'bps': 1,
+            'bits/sec': 1,
+            'Kbps': 1000,
+            'Mbps': 1_000_000,
+            'Gbps': 1_000_000_000,
+        }
+        multiplier = multipliers.get(unit, 1)
+        return int(float(value) * multiplier)
+
+    @staticmethod
+    def parse_interface_detail(output: str) -> Optional[InterfaceDetail]:
+        """
+        Parse 'show interfaces <name>' output for Arista EOS.
+
+        Arista EOS output is similar to Cisco IOS but with differences:
+        - Rate may be "2.50 Gbps" or "0 bps" instead of "bits/sec"
+        - Error line: "10 input errors, 5 CRC, 0 alignment, 0 symbol"
+        - Output: "2 output errors, 0 collisions"
+        - Drops: "0 input queue drops, 3 output drops"
+        - First line may have parenthetical: "Ethernet1 is up, line protocol is up (connected)"
+        - Speed: "10Gb/s" from duplex line
+
+        Args:
+            output: Raw command output from 'show interfaces <name>'
+
+        Returns:
+            InterfaceDetail or None if output is empty or doesn't match
+        """
+        if not output or not output.strip():
+            return None
+
+        lines = output.strip().split('\n')
+
+        # Parse first line: interface name and status
+        # e.g. "Ethernet1 is up, line protocol is up (connected)"
+        # e.g. "Ethernet2 is up, line protocol is down (notconnect)"
+        # Strip anything in parentheses from line protocol status
+        first_line_match = re.match(
+            r'^(\S+)\s+is\s+(.+?),\s+line protocol is\s+(\S+)', lines[0]
+        )
+        if not first_line_match:
+            return None
+
+        name = first_line_match.group(1)
+        interface_status = first_line_match.group(2).strip()
+        line_protocol = first_line_match.group(3).strip()
+
+        # Determine status
+        if "administratively down" in interface_status:
+            status = "admin_down"
+        elif line_protocol == "up":
+            status = "up"
+        else:
+            status = "down"
+
+        # Parse remaining fields from the output
+        description = ""
+        bandwidth = 0  # in Kbit/sec
+        speed = ""
+        input_rate = 0  # bits/sec
+        output_rate = 0  # bits/sec
+        errors_in = 0
+        errors_out = 0
+        discards_in = 0
+        discards_out = 0
+
+        for line in lines[1:]:
+            stripped = line.strip()
+
+            # Description: Uplink to core
+            desc_match = re.match(r'^Description:\s+(.+)$', stripped)
+            if desc_match:
+                description = desc_match.group(1).strip()
+                continue
+
+            # BW 10000000 Kbit/sec
+            bw_match = re.search(r'BW\s+(\d+)\s+Kbit/sec', stripped)
+            if bw_match:
+                bandwidth = int(bw_match.group(1))
+                continue
+
+            # Full-duplex, 10Gb/s, auto negotiation: off, uni-link: n/a
+            speed_match = re.search(r'duplex,\s+(\S+),', stripped)
+            if speed_match:
+                speed = speed_match.group(1)
+                continue
+
+            # 5 minute input rate 2.50 Gbps, 200000 packets/sec
+            # 5 minute input rate 0 bps, 0 packets/sec
+            input_rate_match = re.search(
+                r'5 minute input rate\s+([\d.]+)\s+(\w+(?:/\w+)?)', stripped
+            )
+            if input_rate_match:
+                input_rate = AristaParser._parse_rate(
+                    input_rate_match.group(1), input_rate_match.group(2)
+                )
+                continue
+
+            # 5 minute output rate 5.00 Gbps, 400000 packets/sec
+            output_rate_match = re.search(
+                r'5 minute output rate\s+([\d.]+)\s+(\w+(?:/\w+)?)', stripped
+            )
+            if output_rate_match:
+                output_rate = AristaParser._parse_rate(
+                    output_rate_match.group(1), output_rate_match.group(2)
+                )
+                continue
+
+            # 10 input errors, 5 CRC, 0 alignment, 0 symbol
+            input_errors_match = re.search(r'(\d+)\s+input errors', stripped)
+            if input_errors_match:
+                errors_in = int(input_errors_match.group(1))
+                continue
+
+            # 2 output errors, 0 collisions
+            output_errors_match = re.search(r'(\d+)\s+output errors', stripped)
+            if output_errors_match:
+                errors_out = int(output_errors_match.group(1))
+                continue
+
+            # 0 input queue drops, 3 output drops
+            input_drops_match = re.search(r'(\d+)\s+input queue drops', stripped)
+            if input_drops_match:
+                discards_in = int(input_drops_match.group(1))
+
+            output_drops_match = re.search(r'(\d+)\s+output drops', stripped)
+            if output_drops_match:
+                discards_out = int(output_drops_match.group(1))
+
+        # Calculate utilisation: rate / (bandwidth * 1000) * 100
+        # bandwidth is in Kbit/sec, rate is in bits/sec
+        # bandwidth * 1000 converts Kbit to bits
+        utilisation_in = 0.0
+        utilisation_out = 0.0
+        if bandwidth > 0:
+            bandwidth_bps = bandwidth * 1000
+            utilisation_in = (input_rate / bandwidth_bps) * 100
+            utilisation_out = (output_rate / bandwidth_bps) * 100
+
+        return InterfaceDetail(
+            name=name,
+            description=description,
+            status=status,
+            speed=speed,
+            utilisation_in_pct=utilisation_in,
+            utilisation_out_pct=utilisation_out,
+            errors_in=errors_in,
+            errors_out=errors_out,
+            discards_in=discards_in,
+            discards_out=discards_out,
+        )
