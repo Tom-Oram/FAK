@@ -2,11 +2,11 @@
 
 import time
 import logging
-from typing import List, Optional, Set, Tuple
+from typing import Optional, Set, Tuple
 
 from .models import (
-    NetworkDevice, RouteEntry, PathHop, TracePath,
-    PathStatus, ConnectionConfig, CredentialSet,
+    NetworkDevice, PathHop, TracePath,
+    PathStatus,
     DeviceNotFoundError, RoutingLoopDetected, MaxHopsExceeded,
     ResolveResult, ResolveStatus,
 )
@@ -71,10 +71,7 @@ class PathTracer:
                 elif result.status == ResolveStatus.AMBIGUOUS:
                     path.status = PathStatus.NEEDS_INPUT
                     path.error_message = f"Source IP {source_ip} matches multiple devices. Please select a starting device."
-                    path.metadata['candidates'] = [
-                        {'hostname': c.hostname, 'management_ip': c.management_ip, 'site': c.site, 'vendor': c.vendor}
-                        for c in result.candidates
-                    ]
+                    path.metadata['candidates'] = self._serialize_candidates(result.candidates)
                     path.total_time_ms = (time.time() - start_time) * 1000
                     return path
                 else:
@@ -157,8 +154,8 @@ class PathTracer:
                     logger.warning(path.error_message)
                     break
 
-                # Find next hop device
-                previous_hop = path.hops[-1] if path.hops else None
+                # Find next hop device (hop was just added above, so hops is non-empty)
+                previous_hop = path.hops[-1]
                 resolve_result = self._resolve_device(route.next_hop, previous_hop=previous_hop)
 
                 if resolve_result.status == ResolveStatus.NOT_FOUND:
@@ -170,10 +167,7 @@ class PathTracer:
                     path.status = PathStatus.AMBIGUOUS_HOP
                     path.error_message = f"Next hop {route.next_hop} matches multiple devices. Please select one to continue."
                     path.metadata['ambiguous_hop_sequence'] = hop_sequence + 1
-                    path.metadata['candidates'] = [
-                        {'hostname': c.hostname, 'management_ip': c.management_ip, 'site': c.site, 'vendor': c.vendor}
-                        for c in resolve_result.candidates
-                    ]
+                    path.metadata['candidates'] = self._serialize_candidates(resolve_result.candidates)
                     logger.warning(path.error_message)
                     break
                 else:
@@ -284,6 +278,13 @@ class PathTracer:
 
         # No previous hop context (source IP case) - ambiguous
         return ResolveResult(device=None, status=ResolveStatus.AMBIGUOUS, candidates=candidates)
+
+    def _serialize_candidates(self, candidates: list) -> list:
+        """Serialize candidate devices for API response."""
+        return [
+            {'hostname': c.hostname, 'management_ip': c.management_ip, 'site': c.site, 'vendor': c.vendor}
+            for c in candidates
+        ]
 
     def _determine_next_context(self, current_device: NetworkDevice, current_context: str,
                                 next_device: NetworkDevice, route) -> str:
