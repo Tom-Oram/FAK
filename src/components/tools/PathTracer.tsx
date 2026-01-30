@@ -33,6 +33,7 @@ interface DeviceHop {
     management_ip: string;
     vendor: string;
     device_type: string;
+    site?: string;
     netbox?: NetBoxDevice;
   };
   egress_interface?: string;
@@ -56,6 +57,13 @@ interface NetBoxDevice {
   status?: string;
 }
 
+interface DeviceCandidate {
+  hostname: string;
+  management_ip: string;
+  site?: string;
+  vendor: string;
+}
+
 interface TraceResult {
   mode: 'icmp' | 'device-based';
   sourceIp: string;
@@ -63,12 +71,16 @@ interface TraceResult {
   hops: ICMPHop[] | DeviceHop[];
   startTime: Date;
   endTime?: Date;
-  status: 'running' | 'complete' | 'error' | string;
+  status: 'running' | 'complete' | 'error' | 'needs_input' | 'ambiguous_hop' | string;
   error?: string;
   // Device-based specific fields
   hop_count?: number;
   total_time_ms?: number;
   error_message?: string;
+  // Disambiguation fields
+  candidates?: DeviceCandidate[];
+  ambiguous_hop_sequence?: number;
+  inventory_warnings?: string[];
 }
 
 export default function PathTracer() {
