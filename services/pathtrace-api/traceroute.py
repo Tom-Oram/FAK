@@ -340,10 +340,11 @@ def perform_device_trace(source_ip, destination_ip, inventory_file=None, start_d
     }
 
 
-@app.route('/api/traceroute', methods=['POST'])
+@app.route('/traceroute', methods=['POST'])
 def traceroute():
     """
-    API endpoint for ICMP traceroute (legacy).
+    API endpoint for ICMP traceroute.
+    Public path: /pathtrace/api/traceroute (nginx strips /pathtrace/api/ prefix).
 
     Expects JSON body:
     {
@@ -395,10 +396,11 @@ def traceroute():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/traceroute/device-based', methods=['POST'])
+@app.route('/traceroute/device-based', methods=['POST'])
 def device_based_traceroute():
     """
     API endpoint for device-based path tracing.
+    Public path: /pathtrace/api/traceroute/device-based (nginx strips /pathtrace/api/ prefix).
 
     Expects JSON body:
     {
@@ -469,7 +471,7 @@ def device_based_traceroute():
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint."""
-    return jsonify({'status': 'ok', 'service': 'traceroute-api'})
+    return jsonify({'status': 'ok', 'service': 'pathtrace-api'})
 
 
 if __name__ == '__main__':
