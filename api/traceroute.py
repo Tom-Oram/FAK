@@ -96,6 +96,100 @@ def get_hostname(ip_address):
         return None
 
 
+def _serialize_interface_detail(detail):
+    """Serialize an InterfaceDetail to a dict, or None."""
+    if detail is None:
+        return None
+    return {
+        'name': detail.name,
+        'description': detail.description,
+        'status': detail.status,
+        'speed': detail.speed,
+        'utilisation_in_pct': detail.utilisation_in_pct,
+        'utilisation_out_pct': detail.utilisation_out_pct,
+        'errors_in': detail.errors_in,
+        'errors_out': detail.errors_out,
+        'discards_in': detail.discards_in,
+        'discards_out': detail.discards_out,
+    }
+
+
+def _serialize_policy_result(policy):
+    """Serialize a PolicyResult to a dict, or None."""
+    if policy is None:
+        return None
+    return {
+        'rule_name': policy.rule_name,
+        'rule_position': policy.rule_position,
+        'action': policy.action,
+        'source_zone': policy.source_zone,
+        'dest_zone': policy.dest_zone,
+        'source_addresses': policy.source_addresses,
+        'dest_addresses': policy.dest_addresses,
+        'services': policy.services,
+        'logging': policy.logging,
+        'raw_output': policy.raw_output,
+    }
+
+
+def _serialize_nat_translation(t):
+    """Serialize a NatTranslation to a dict, or None."""
+    if t is None:
+        return None
+    return {
+        'original_ip': t.original_ip,
+        'original_port': t.original_port,
+        'translated_ip': t.translated_ip,
+        'translated_port': t.translated_port,
+        'nat_rule_name': t.nat_rule_name,
+    }
+
+
+def _serialize_nat_result(nat):
+    """Serialize a NatResult to a dict, or None."""
+    if nat is None:
+        return None
+    return {
+        'snat': _serialize_nat_translation(nat.snat),
+        'dnat': _serialize_nat_translation(nat.dnat),
+    }
+
+
+def _serialize_hop(hop):
+    """Serialize a PathHop to a dict for API response."""
+    hop_data = {
+        'sequence': hop.sequence,
+        'device': {
+            'hostname': hop.device.hostname,
+            'management_ip': hop.device.management_ip,
+            'vendor': hop.device.vendor,
+            'device_type': hop.device.device_type,
+            'site': hop.device.site,
+        },
+        'egress_interface': hop.egress_interface,
+        'logical_context': hop.logical_context,
+        'lookup_time_ms': hop.lookup_time_ms,
+        'resolve_status': hop.resolve_status,
+        'ingress_detail': _serialize_interface_detail(hop.ingress_detail),
+        'egress_detail': _serialize_interface_detail(hop.egress_detail),
+        'policy_result': _serialize_policy_result(hop.policy_result),
+        'nat_result': _serialize_nat_result(hop.nat_result),
+    }
+
+    # Add route information if available
+    if hop.route_used:
+        hop_data['route'] = {
+            'destination': hop.route_used.destination,
+            'next_hop': hop.route_used.next_hop,
+            'next_hop_type': hop.route_used.next_hop_type,
+            'protocol': hop.route_used.protocol,
+            'metric': hop.route_used.metric,
+            'preference': hop.route_used.preference,
+        }
+
+    return hop_data
+
+
 def perform_traceroute(source_ip, destination_ip, netbox_url=None, netbox_token=None, max_hops=30):
     """
     Perform layer 3 traceroute from source to destination.
@@ -157,7 +251,8 @@ def perform_traceroute(source_ip, destination_ip, netbox_url=None, netbox_token=
 
 
 def perform_device_trace(source_ip, destination_ip, inventory_file=None, start_device=None,
-                         source_context=None, netbox_url=None, netbox_token=None):
+                         source_context=None, netbox_url=None, netbox_token=None,
+                         protocol="tcp", destination_port=443):
     """
     Perform device-based path trace by querying routing tables.
 
@@ -169,6 +264,8 @@ def perform_device_trace(source_ip, destination_ip, inventory_file=None, start_d
         source_context: Optional starting VRF/context
         netbox_url: Optional NetBox URL for enrichment
         netbox_token: Optional NetBox API token
+        protocol: Protocol for firewall policy lookup (default: tcp)
+        destination_port: Destination port for firewall policy lookup (default: 443)
 
     Returns:
         Dictionary with trace results
@@ -215,36 +312,15 @@ def perform_device_trace(source_ip, destination_ip, inventory_file=None, start_d
         source_ip=source_ip,
         destination_ip=destination_ip,
         initial_context=source_context,
-        start_device=start_device
+        start_device=start_device,
+        protocol=protocol,
+        destination_port=destination_port
     )
 
     # Convert to API response format
     hops = []
     for hop in trace_path.hops:
-        hop_data = {
-            'sequence': hop.sequence,
-            'device': {
-                'hostname': hop.device.hostname,
-                'management_ip': hop.device.management_ip,
-                'vendor': hop.device.vendor,
-                'device_type': hop.device.device_type,
-                'site': hop.device.site,
-            },
-            'egress_interface': hop.egress_interface,
-            'logical_context': hop.logical_context,
-            'lookup_time_ms': hop.lookup_time_ms,
-        }
-
-        # Add route information if available
-        if hop.route_used:
-            hop_data['route'] = {
-                'destination': hop.route_used.destination,
-                'next_hop': hop.route_used.next_hop,
-                'next_hop_type': hop.route_used.next_hop_type,
-                'protocol': hop.route_used.protocol,
-                'metric': hop.route_used.metric,
-                'preference': hop.route_used.preference,
-            }
+        hop_data = _serialize_hop(hop)
 
         # Optionally enrich with NetBox data
         if netbox_url and netbox_token:
@@ -335,6 +411,8 @@ def device_based_traceroute():
         "inventoryFile": "inventory.yaml",          // optional
         "startDevice": "core-rtr-01",               // optional
         "sourceContext": "VRF_CORP",                // optional
+        "protocol": "tcp",                          // optional, default tcp
+        "destinationPort": 443,                     // optional, default 443
         "netboxUrl": "https://netbox.example.com",  // optional
         "netboxToken": "your-token-here"            // optional
     }
@@ -347,6 +425,8 @@ def device_based_traceroute():
         inventory_file = data.get('inventoryFile')
         start_device = data.get('startDevice')
         source_context = data.get('sourceContext')
+        protocol = data.get('protocol', 'tcp')
+        destination_port = data.get('destinationPort', 443)
         netbox_url = data.get('netboxUrl')
         netbox_token = data.get('netboxToken')
 
@@ -370,7 +450,9 @@ def device_based_traceroute():
             start_device=start_device,
             source_context=source_context,
             netbox_url=netbox_url,
-            netbox_token=netbox_token
+            netbox_token=netbox_token,
+            protocol=protocol,
+            destination_port=destination_port
         )
 
         end_time = datetime.utcnow()
