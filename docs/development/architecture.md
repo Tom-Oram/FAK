@@ -19,18 +19,30 @@ First Aid Kit is a multi-service application:
 ┌─────────────────────────────────────────────────────────┐
 │                    Nginx (Proxy)                         │
 │  - Static file serving                                   │
-│  - API proxy (/api/* → backend)                         │
-│  - WebSocket proxy (/iperf/* → iperf-backend)          │
+│  - Path Tracer proxy (/pathtrace/api/* → pathtrace-api) │
+│  - iPerf proxy (/iperf/* → iperf-api)                   │
 └─────────────────────────────────────────────────────────┘
            │                              │
            ▼                              ▼
 ┌─────────────────────┐    ┌─────────────────────────────┐
-│   Python Backend    │    │       Go Backend            │
-│   (Flask)           │    │       (Chi router)          │
-│   - Traceroute      │    │   - iPerf3 management       │
-│   - NetBox client   │    │   - WebSocket hub           │
-│   - Scanopy client  │    │   - SQLite persistence      │
+│  pathtrace-api      │    │       iperf-api             │
+│  (Python Flask)     │    │       (Go Chi router)       │
+│  - Traceroute       │    │   - iPerf3 management       │
+│  - Path tracer      │    │   - WebSocket hub           │
+│  - NetBox client    │    │   - SQLite persistence      │
 └─────────────────────┘    └─────────────────────────────┘
+```
+
+## Service Structure
+
+```
+services/
+├── pathtrace-api/     # Python Flask — ICMP traceroute + device-based path tracing
+│   ├── traceroute.py  # Flask app with API endpoints
+│   └── pathtracer/    # Device tracing module (drivers, parsers, models)
+└── iperf-api/         # Go — iPerf3 server lifecycle management
+    ├── cmd/server/    # Entry point
+    └── internal/      # API handlers, WebSocket, storage
 ```
 
 ## Frontend Structure
@@ -49,6 +61,6 @@ src/
 ## Technology Stack
 
 - **Frontend**: React 18, TypeScript, Tailwind CSS, Vite
-- **Python Backend**: Flask, Scapy, NetBox client
-- **Go Backend**: Chi router, gorilla/websocket, go-sqlite3
+- **pathtrace-api**: Flask, Scapy, Netmiko, NetBox client
+- **iperf-api**: Chi router, gorilla/websocket, go-sqlite3
 - **Infrastructure**: Docker, Nginx, SQLite
