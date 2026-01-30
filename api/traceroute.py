@@ -228,6 +228,7 @@ def perform_device_trace(source_ip, destination_ip, inventory_file=None, start_d
                 'management_ip': hop.device.management_ip,
                 'vendor': hop.device.vendor,
                 'device_type': hop.device.device_type,
+                'site': hop.device.site,
             },
             'egress_interface': hop.egress_interface,
             'logical_context': hop.logical_context,
@@ -261,6 +262,9 @@ def perform_device_trace(source_ip, destination_ip, inventory_file=None, start_d
         'hop_count': trace_path.hop_count(),
         'total_time_ms': trace_path.total_time_ms,
         'error_message': trace_path.error_message,
+        'candidates': trace_path.metadata.get('candidates', []),
+        'ambiguous_hop_sequence': trace_path.metadata.get('ambiguous_hop_sequence'),
+        'inventory_warnings': inventory.get_warnings(),
     }
 
 
