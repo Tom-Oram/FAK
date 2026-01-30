@@ -2,7 +2,7 @@
 
 import re
 from typing import List, Optional
-from ..models import RouteEntry, NextHopType
+from ..models import RouteEntry, NextHopType, InterfaceDetail
 
 
 class PaloAltoParser:
@@ -215,3 +215,144 @@ class PaloAltoParser:
                     current_interface = None
 
         return interfaces
+
+    @staticmethod
+    def parse_interface_detail(output: str) -> Optional[InterfaceDetail]:
+        """
+        Parse 'show interface <name>' output from PAN-OS.
+
+        Expected format:
+        -------------------------------------------------------------------------------
+        Name: ethernet1/1
+          Link speed:          1000
+          Link duplex:         full
+          Link state:          up
+          MAC address:         00:50:56:89:00:01
+          Description:         Outside uplink
+          Zone:                untrust
+          Vsys:                vsys1
+          Bytes received:      640000000
+          Bytes transmitted:   1280000000
+          Packets received:    1000000
+          Packets transmitted: 2000000
+          Errors received:     5
+          Drops received:      2
+          Errors transmitted:  1
+          Drops transmitted:   0
+        -------------------------------------------------------------------------------
+
+        Args:
+            output: Raw command output
+
+        Returns:
+            InterfaceDetail or None if parsing fails
+        """
+        if not output or not output.strip():
+            return None
+
+        lines = output.strip().split('\n')
+
+        name = None
+        description = ""
+        status = "unknown"
+        speed = ""
+        errors_in = 0
+        errors_out = 0
+        discards_in = 0
+        discards_out = 0
+
+        for line in lines:
+            stripped = line.strip()
+
+            # Name
+            match = re.match(r'^Name:\s+(.+)$', stripped)
+            if match:
+                name = match.group(1).strip()
+                continue
+
+            # Description
+            match = re.match(r'^Description:\s+(.+)$', stripped)
+            if match:
+                description = match.group(1).strip()
+                continue
+
+            # Link state
+            match = re.match(r'^Link state:\s+(\S+)', stripped)
+            if match:
+                state = match.group(1).lower()
+                if state == "up":
+                    status = "up"
+                elif state == "down":
+                    status = "down"
+                else:
+                    status = state
+                continue
+
+            # Link speed
+            match = re.match(r'^Link speed:\s+(\d+)', stripped)
+            if match:
+                speed = f"{match.group(1)}Mb/s"
+                continue
+
+            # Errors received
+            match = re.match(r'^Errors received:\s+(\d+)', stripped)
+            if match:
+                errors_in = int(match.group(1))
+                continue
+
+            # Errors transmitted
+            match = re.match(r'^Errors transmitted:\s+(\d+)', stripped)
+            if match:
+                errors_out = int(match.group(1))
+                continue
+
+            # Drops received
+            match = re.match(r'^Drops received:\s+(\d+)', stripped)
+            if match:
+                discards_in = int(match.group(1))
+                continue
+
+            # Drops transmitted
+            match = re.match(r'^Drops transmitted:\s+(\d+)', stripped)
+            if match:
+                discards_out = int(match.group(1))
+                continue
+
+        if name is None:
+            return None
+
+        return InterfaceDetail(
+            name=name,
+            description=description,
+            status=status,
+            speed=speed,
+            utilisation_in_pct=None,
+            utilisation_out_pct=None,
+            errors_in=errors_in,
+            errors_out=errors_out,
+            discards_in=discards_in,
+            discards_out=discards_out,
+        )
+
+    @staticmethod
+    def parse_zone_from_interface(output: str) -> Optional[str]:
+        """
+        Parse the zone name from 'show interface <name>' output.
+
+        Looks for the 'Zone:' line in the output.
+
+        Args:
+            output: Raw command output from 'show interface <name>'
+
+        Returns:
+            Zone name string, or None if not found
+        """
+        if not output or not output.strip():
+            return None
+
+        for line in output.strip().split('\n'):
+            match = re.match(r'^\s*Zone:\s+(\S+)', line)
+            if match:
+                return match.group(1).strip()
+
+        return None

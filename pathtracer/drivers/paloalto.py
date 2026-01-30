@@ -8,7 +8,7 @@ from netmiko.exceptions import NetmikoTimeoutException, NetmikoAuthenticationExc
 
 from .base import NetworkDriver
 from ..models import (
-    RouteEntry, NetworkDevice, CredentialSet,
+    RouteEntry, NetworkDevice, CredentialSet, InterfaceDetail,
     DeviceConnectionError, AuthenticationError, CommandError
 )
 from ..parsers.paloalto_parser import PaloAltoParser
@@ -227,3 +227,47 @@ class PaloAltoDriver(NetworkDriver):
         except Exception as e:
             logger.warning(f"Failed to detect device info: {e}")
             return {'hostname': self.device.hostname, 'version': '', 'model': '', 'serial': ''}
+
+    def get_interface_detail(self, interface_name: str) -> Optional[InterfaceDetail]:
+        """
+        Get operational detail for a specific interface.
+
+        Args:
+            interface_name: Interface name (e.g. 'ethernet1/1')
+
+        Returns:
+            InterfaceDetail or None if not found or on error
+        """
+        if not self._connected:
+            return None
+
+        try:
+            command = f"show interface {interface_name}"
+            logger.debug(f"Executing: {command}")
+            output = self.connection.send_command(command)
+            return self.parser.parse_interface_detail(output)
+        except Exception as e:
+            logger.warning(f"Failed to get interface detail for {interface_name}: {e}")
+            return None
+
+    def get_zone_for_interface(self, interface_name: str) -> Optional[str]:
+        """
+        Get the security zone assigned to an interface.
+
+        Args:
+            interface_name: Interface name (e.g. 'ethernet1/1')
+
+        Returns:
+            Zone name string, or None if not found or on error
+        """
+        if not self._connected:
+            return None
+
+        try:
+            command = f"show interface {interface_name}"
+            logger.debug(f"Executing: {command}")
+            output = self.connection.send_command(command)
+            return self.parser.parse_zone_from_interface(output)
+        except Exception as e:
+            logger.warning(f"Failed to get zone for interface {interface_name}: {e}")
+            return None
