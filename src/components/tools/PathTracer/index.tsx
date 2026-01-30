@@ -220,17 +220,17 @@ export default function PathTracer() {
   const getHopColor = (hop: ICMPHop | DeviceHop) => {
     // For ICMP hops, use RTT
     if ('rtt' in hop) {
-      if (hop.rtt < 10) return 'text-success-600';
-      if (hop.rtt < 50) return 'text-warning-600';
-      return 'text-danger-600';
+      if (hop.rtt < 10) return 'text-success-600 dark:text-success-400';
+      if (hop.rtt < 50) return 'text-warning-600 dark:text-warning-400';
+      return 'text-danger-600 dark:text-danger-400';
     }
     // For device-based hops, use lookup time
     if ('lookup_time_ms' in hop) {
-      if (hop.lookup_time_ms < 1000) return 'text-success-600';
-      if (hop.lookup_time_ms < 3000) return 'text-warning-600';
-      return 'text-danger-600';
+      if (hop.lookup_time_ms < 1000) return 'text-success-600 dark:text-success-400';
+      if (hop.lookup_time_ms < 3000) return 'text-warning-600 dark:text-warning-400';
+      return 'text-danger-600 dark:text-danger-400';
     }
-    return 'text-slate-600';
+    return 'text-slate-600 dark:text-slate-400';
   };
 
   const getHopKey = (hop: ICMPHop | DeviceHop): number => {
@@ -250,7 +250,7 @@ export default function PathTracer() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Path Tracer</h1>
-        <p className="mt-1 text-slate-600">
+        <p className="mt-1 text-slate-600 dark:text-slate-400">
           Layer 3 hop-by-hop path discovery with NetBox device lookup
         </p>
       </div>
@@ -261,7 +261,7 @@ export default function PathTracer() {
           <h2 className="font-semibold text-slate-900 dark:text-white">Configuration</h2>
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className="text-sm text-primary-600 hover:text-primary-700"
+            className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
           >
             {showSettings ? 'Hide' : 'Show'} Advanced Settings
           </button>
@@ -269,7 +269,7 @@ export default function PathTracer() {
         <div className="card-body space-y-4">
           {/* Trace Mode Selection */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Trace Mode
             </label>
             <div className="flex gap-4">
@@ -282,8 +282,8 @@ export default function PathTracer() {
                   disabled={isTracing}
                   className="w-4 h-4 text-primary-600"
                 />
-                <span className="text-sm text-slate-700">
-                  ICMP Traceroute <span className="text-slate-500">(Fast, works anywhere)</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">
+                  ICMP Traceroute <span className="text-slate-500 dark:text-slate-400">(Fast, works anywhere)</span>
                 </span>
               </label>
               <label className="flex items-center gap-2">
@@ -295,8 +295,8 @@ export default function PathTracer() {
                   disabled={isTracing}
                   className="w-4 h-4 text-primary-600"
                 />
-                <span className="text-sm text-slate-700">
-                  Device-Based <span className="text-slate-500">(Routing tables, VRF-aware)</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">
+                  Device-Based <span className="text-slate-500 dark:text-slate-400">(Routing tables, VRF-aware)</span>
                 </span>
               </label>
             </div>
@@ -304,7 +304,7 @@ export default function PathTracer() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Source IP Address
               </label>
               <div className="relative">
@@ -314,13 +314,13 @@ export default function PathTracer() {
                   value={sourceIp}
                   onChange={(e) => setSourceIp(e.target.value)}
                   placeholder="192.168.1.1"
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                   disabled={isTracing}
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Destination IP Address
               </label>
               <div className="relative">
@@ -330,7 +330,7 @@ export default function PathTracer() {
                   value={destinationIp}
                   onChange={(e) => setDestinationIp(e.target.value)}
                   placeholder="8.8.8.8"
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                   disabled={isTracing}
                 />
               </div>
@@ -338,12 +338,12 @@ export default function PathTracer() {
           </div>
 
           {showSettings && (
-            <div className="space-y-4 pt-4 border-t border-slate-200">
+            <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-700">
               {/* Device-Based Options */}
               {traceMode === 'device-based' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 bg-primary-50 dark:bg-primary-950/30 border border-primary-200 dark:border-primary-800 rounded-lg">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Start Device (Optional)
                     </label>
                     <input
@@ -351,13 +351,13 @@ export default function PathTracer() {
                       value={startDevice}
                       onChange={(e) => setStartDevice(e.target.value)}
                       placeholder="core-rtr-01"
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                      className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                       disabled={isTracing}
                     />
-                    <p className="text-xs text-slate-500 mt-1">Override starting device</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Override starting device</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Source VRF/Context (Optional)
                     </label>
                     <input
@@ -365,13 +365,13 @@ export default function PathTracer() {
                       value={sourceContext}
                       onChange={(e) => setSourceContext(e.target.value)}
                       placeholder="VRF_CORP"
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                      className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                       disabled={isTracing}
                     />
-                    <p className="text-xs text-slate-500 mt-1">VRF or virtual router name</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">VRF or virtual router name</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Inventory File (Optional)
                     </label>
                     <input
@@ -379,29 +379,29 @@ export default function PathTracer() {
                       value={inventoryFile}
                       onChange={(e) => setInventoryFile(e.target.value)}
                       placeholder="inventory.yaml"
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                      className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                       disabled={isTracing}
                     />
-                    <p className="text-xs text-slate-500 mt-1">Path to inventory file</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Path to inventory file</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Protocol (Optional)
                     </label>
                     <select
                       value={protocol}
                       onChange={(e) => setProtocol(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                      className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                       disabled={isTracing}
                     >
                       <option value="tcp">TCP</option>
                       <option value="udp">UDP</option>
                       <option value="icmp">ICMP</option>
                     </select>
-                    <p className="text-xs text-slate-500 mt-1">For firewall policy lookup</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">For firewall policy lookup</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                       Dest Port (Optional)
                     </label>
                     <input
@@ -409,10 +409,10 @@ export default function PathTracer() {
                       value={destinationPort}
                       onChange={(e) => setDestinationPort(e.target.value)}
                       placeholder="443"
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                      className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                       disabled={isTracing}
                     />
-                    <p className="text-xs text-slate-500 mt-1">For firewall policy lookup</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">For firewall policy lookup</p>
                   </div>
                 </div>
               )}
@@ -420,7 +420,7 @@ export default function PathTracer() {
               {/* NetBox Settings */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     NetBox URL (Optional)
                   </label>
                   <input
@@ -428,12 +428,12 @@ export default function PathTracer() {
                     value={netboxUrl}
                     onChange={(e) => setNetboxUrl(e.target.value)}
                     placeholder="https://netbox.example.com"
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                    className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                     disabled={isTracing}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     NetBox API Token (Optional)
                   </label>
                   <input
@@ -441,7 +441,7 @@ export default function PathTracer() {
                     value={netboxToken}
                     onChange={(e) => setNetboxToken(e.target.value)}
                     placeholder="API token"
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                    className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                     disabled={isTracing}
                   />
                 </div>
@@ -470,11 +470,11 @@ export default function PathTracer() {
       </div>
 
       {/* Info Banner */}
-      <div className="flex items-start gap-3 p-4 bg-primary-50 border border-primary-200 rounded-lg">
-        <Info className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-primary-800">
+      <div className="flex items-start gap-3 p-4 bg-primary-50 dark:bg-primary-950/30 border border-primary-200 dark:border-primary-800 rounded-lg">
+        <Info className="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-primary-800 dark:text-primary-200">
           <p className="font-medium mb-1">Two Trace Modes Available</p>
-          <p className="text-primary-700">
+          <p className="text-primary-700 dark:text-primary-300">
             <strong>ICMP Traceroute:</strong> Fast, works from any source. Uses ICMP packets with incrementing TTL.<br />
             <strong>Device-Based:</strong> SSH into network devices to query routing tables. Shows actual forwarding paths,
             works through firewalls, VRF-aware. Requires device inventory and credentials.
@@ -490,7 +490,7 @@ export default function PathTracer() {
               <Route className="w-5 h-5 text-primary-600" />
               <div>
                 <h2 className="font-semibold text-slate-900 dark:text-white">Path Trace Results</h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {traceResult.sourceIp} → {traceResult.destinationIp}
                 </p>
               </div>
@@ -514,11 +514,11 @@ export default function PathTracer() {
 
           <div className="card-body">
             {traceResult.status === 'error' && (
-              <div className="flex items-start gap-3 p-4 bg-danger-50 border border-danger-200 rounded-lg mb-4">
-                <AlertCircle className="w-5 h-5 text-danger-600 flex-shrink-0" />
+              <div className="flex items-start gap-3 p-4 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-lg mb-4">
+                <AlertCircle className="w-5 h-5 text-danger-600 dark:text-danger-400 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-danger-900">Trace Failed</p>
-                  <p className="text-sm text-danger-700 mt-1">{traceResult.error}</p>
+                  <p className="text-sm font-medium text-danger-900 dark:text-danger-200">Trace Failed</p>
+                  <p className="text-sm text-danger-700 dark:text-danger-300 mt-1">{traceResult.error}</p>
                 </div>
               </div>
             )}
@@ -614,11 +614,11 @@ export default function PathTracer() {
                   return (
                     <div
                       key={hopKey}
-                      className="border border-slate-200 rounded-lg overflow-hidden"
+                      className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden"
                     >
                       <button
                         onClick={() => toggleHop(hopKey)}
-                        className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 text-left"
+                        className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-left transition-colors"
                       >
                         {isExpanded ? (
                           <ChevronDown className="w-4 h-4 text-slate-400" />
@@ -642,7 +642,7 @@ export default function PathTracer() {
                                 {hop.timeout ? '*' : hop.ip}
                               </span>
                               {hop.hostname && (
-                                <span className="text-sm text-slate-500">
+                                <span className="text-sm text-slate-500 dark:text-slate-400">
                                   ({hop.hostname})
                                 </span>
                               )}
@@ -656,7 +656,7 @@ export default function PathTracer() {
                               <span className="font-semibold text-sm text-slate-900 dark:text-white">
                                 {hop.device.hostname}
                               </span>
-                              <span className="font-mono text-xs text-slate-500">
+                              <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
                                 {hop.device.management_ip}
                               </span>
                               <span className="badge-primary">{hop.device.vendor}</span>
@@ -688,37 +688,37 @@ export default function PathTracer() {
 
                       {/* Expanded Details */}
                       {isExpanded && (
-                        <div className="px-4 pb-4 border-t border-slate-200 bg-slate-50">
+                        <div className="px-4 pb-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
                           <div className="grid grid-cols-2 gap-4 pt-4">
                             {isICMPHop(hop) && hop.device && (
                               /* ICMP NetBox Device Info */
                               <>
                                 <div>
-                                  <dt className="text-xs text-slate-500">Device Name</dt>
-                                  <dd className="text-sm font-medium text-slate-900 mt-1">
+                                  <dt className="text-xs text-slate-500 dark:text-slate-400">Device Name</dt>
+                                  <dd className="text-sm font-medium text-slate-900 dark:text-white mt-1">
                                     {hop.device.name}
                                   </dd>
                                 </div>
                                 {hop.device.site && (
                                   <div>
-                                    <dt className="text-xs text-slate-500">Site</dt>
-                                    <dd className="text-sm text-slate-900 mt-1">
+                                    <dt className="text-xs text-slate-500 dark:text-slate-400">Site</dt>
+                                    <dd className="text-sm text-slate-900 dark:text-white mt-1">
                                       {hop.device.site}
                                     </dd>
                                   </div>
                                 )}
                                 {hop.device.role && (
                                   <div>
-                                    <dt className="text-xs text-slate-500">Role</dt>
-                                    <dd className="text-sm text-slate-900 mt-1">
+                                    <dt className="text-xs text-slate-500 dark:text-slate-400">Role</dt>
+                                    <dd className="text-sm text-slate-900 dark:text-white mt-1">
                                       {hop.device.role}
                                     </dd>
                                   </div>
                                 )}
                                 {hop.device.platform && (
                                   <div>
-                                    <dt className="text-xs text-slate-500">Platform</dt>
-                                    <dd className="text-sm text-slate-900 mt-1">
+                                    <dt className="text-xs text-slate-500 dark:text-slate-400">Platform</dt>
+                                    <dd className="text-sm text-slate-900 dark:text-white mt-1">
                                       {hop.device.platform}
                                     </dd>
                                   </div>
@@ -727,23 +727,23 @@ export default function PathTracer() {
                             )}
                             {isICMPHop(hop) && hop.asn && (
                               <div>
-                                <dt className="text-xs text-slate-500">ASN</dt>
-                                <dd className="text-sm text-slate-900 mt-1">{hop.asn}</dd>
+                                <dt className="text-xs text-slate-500 dark:text-slate-400">ASN</dt>
+                                <dd className="text-sm text-slate-900 dark:text-white mt-1">{hop.asn}</dd>
                               </div>
                             )}
                             {isDeviceHop(hop) && (
                               /* Device-Based Hop Detailed Info */
                               <>
                                 <div>
-                                  <dt className="text-xs text-slate-500">Device Type</dt>
-                                  <dd className="text-sm text-slate-900 mt-1">
+                                  <dt className="text-xs text-slate-500 dark:text-slate-400">Device Type</dt>
+                                  <dd className="text-sm text-slate-900 dark:text-white mt-1">
                                     {hop.device.device_type}
                                   </dd>
                                 </div>
                                 {hop.egress_interface && (
                                   <div>
-                                    <dt className="text-xs text-slate-500">Egress Interface</dt>
-                                    <dd className="text-sm font-mono text-slate-900 mt-1">
+                                    <dt className="text-xs text-slate-500 dark:text-slate-400">Egress Interface</dt>
+                                    <dd className="text-sm font-mono text-slate-900 dark:text-white mt-1">
                                       {hop.egress_interface}
                                     </dd>
                                   </div>
@@ -751,26 +751,26 @@ export default function PathTracer() {
                                 {hop.route && (
                                   <>
                                     <div>
-                                      <dt className="text-xs text-slate-500">Next Hop</dt>
-                                      <dd className="text-sm font-mono text-slate-900 mt-1">
+                                      <dt className="text-xs text-slate-500 dark:text-slate-400">Next Hop</dt>
+                                      <dd className="text-sm font-mono text-slate-900 dark:text-white mt-1">
                                         {hop.route.next_hop}
                                       </dd>
                                     </div>
                                     <div>
-                                      <dt className="text-xs text-slate-500">Route Destination</dt>
-                                      <dd className="text-sm font-mono text-slate-900 mt-1">
+                                      <dt className="text-xs text-slate-500 dark:text-slate-400">Route Destination</dt>
+                                      <dd className="text-sm font-mono text-slate-900 dark:text-white mt-1">
                                         {hop.route.destination}
                                       </dd>
                                     </div>
                                     <div>
-                                      <dt className="text-xs text-slate-500">Metric</dt>
-                                      <dd className="text-sm text-slate-900 mt-1">
+                                      <dt className="text-xs text-slate-500 dark:text-slate-400">Metric</dt>
+                                      <dd className="text-sm text-slate-900 dark:text-white mt-1">
                                         {hop.route.metric}
                                       </dd>
                                     </div>
                                     <div>
-                                      <dt className="text-xs text-slate-500">Admin Distance</dt>
-                                      <dd className="text-sm text-slate-900 mt-1">
+                                      <dt className="text-xs text-slate-500 dark:text-slate-400">Admin Distance</dt>
+                                      <dd className="text-sm text-slate-900 dark:text-white mt-1">
                                         {hop.route.preference}
                                       </dd>
                                     </div>
@@ -779,15 +779,15 @@ export default function PathTracer() {
                                 {hop.device.netbox && (
                                   <>
                                     <div>
-                                      <dt className="text-xs text-slate-500">NetBox Name</dt>
-                                      <dd className="text-sm text-slate-900 mt-1">
+                                      <dt className="text-xs text-slate-500 dark:text-slate-400">NetBox Name</dt>
+                                      <dd className="text-sm text-slate-900 dark:text-white mt-1">
                                         {hop.device.netbox.name}
                                       </dd>
                                     </div>
                                     {hop.device.netbox.site && (
                                       <div>
-                                        <dt className="text-xs text-slate-500">Site</dt>
-                                        <dd className="text-sm text-slate-900 mt-1">
+                                        <dt className="text-xs text-slate-500 dark:text-slate-400">Site</dt>
+                                        <dd className="text-sm text-slate-900 dark:text-white mt-1">
                                           {hop.device.netbox.site}
                                         </dd>
                                       </div>
@@ -807,7 +807,7 @@ export default function PathTracer() {
             ) : traceResult.status === 'running' ? (
               <div className="text-center py-8">
                 <Clock className="w-12 h-12 text-primary-600 animate-spin mx-auto mb-3" />
-                <p className="text-slate-600">Discovering path...</p>
+                <p className="text-slate-600 dark:text-slate-400">Discovering path...</p>
               </div>
             ) : null}
 
@@ -851,8 +851,8 @@ export default function PathTracer() {
             )}
 
             {traceResult.endTime && traceResult.status === 'complete' && (
-              <div className="mt-4 pt-4 border-t border-slate-200">
-                <div className="flex items-center gap-2 text-sm text-slate-600">
+              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                   <CheckCircle className="w-4 h-4 text-success-600" />
                   <span>
                     Trace completed in{' '}
@@ -867,16 +867,16 @@ export default function PathTracer() {
       )}
 
       {/* Setup Instructions */}
-      <div className="card bg-slate-50 border-slate-200">
+      <div className="card bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
         <div className="card-body">
-          <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+          <h3 className="font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
             <Server className="w-5 h-5 text-primary-600" />
             Backend API Setup
           </h3>
-          <div className="space-y-2 text-sm text-slate-700">
+          <div className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
             <p>
               This tool requires a Python backend API with Scapy. Create an endpoint at{' '}
-              <code className="bg-slate-200 px-1 rounded">/api/traceroute</code>:
+              <code className="bg-slate-200 dark:bg-slate-700 px-1 rounded">/api/traceroute</code>:
             </p>
             <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-xs">
 {`from scapy.all import sr1, IP, ICMP
