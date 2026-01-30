@@ -192,6 +192,7 @@ export default function PathTracer() {
         hop_count: result.hop_count,
         total_time_ms: result.total_time_ms,
         error_message: result.error_message,
+        inventory_warnings: result.inventory_warnings,
       });
     } catch (error) {
       setTraceResult(prev => ({
@@ -258,6 +259,7 @@ export default function PathTracer() {
           total_time_ms: (prev.total_time_ms || 0) + (data.total_time_ms || 0),
           candidates: data.candidates,
           ambiguous_hop_sequence: data.ambiguous_hop_sequence,
+          inventory_warnings: data.inventory_warnings,
         };
       });
     } catch (err) {

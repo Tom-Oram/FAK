@@ -352,7 +352,7 @@ show vrf
 - `trace_path()`: Main tracing algorithm
 - `_query_device()`: SSH and query single device
 - `_get_driver()`: Factory for vendor drivers
-- `_find_next_device()`: Locate next hop in inventory
+- `_resolve_device()`: Resolve next hop to inventory device (includes site-affinity disambiguation)
 - `_determine_next_context()`: VRF transition logic
 
 ### discovery.py (~150 lines)
