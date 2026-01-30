@@ -17,12 +17,12 @@ services:
       VITE_API_URL: http://localhost:8082
       VITE_WS_URL: ws://localhost:8082/ws
 
-  # Development backend with live reload would require air or similar
-  iperf-backend:
+  # Development iPerf backend with live reload would require air or similar
+  iperf-api:
     build:
-      context: ./backend
+      context: ./services/iperf-api
     volumes:
-      - ./backend:/app/src
+      - ./services/iperf-api:/app/src
       - iperf-data:/app/data
     environment:
       DATA_DIR: /app/data

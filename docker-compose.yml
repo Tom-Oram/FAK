@@ -20,15 +20,15 @@ services:
       - /var/run
       - /tmp
     depends_on:
-      - backend
-      - iperf-backend
+      - pathtrace-api
+      - iperf-api
 
-  # First Aid Kit Backend API (Traceroute)
-  backend:
+  # Path Tracer API (Python Flask)
+  pathtrace-api:
     build:
-      context: .
-      dockerfile: ./api/Dockerfile
-    container_name: fak-backend
+      context: ./services/pathtrace-api
+      dockerfile: Dockerfile
+    container_name: fak-pathtrace-api
     ports:
       - "5000:5000"
     environment:
@@ -42,8 +42,8 @@ services:
       PATHTRACE_INVENTORY: /app/pathtracer/inventory.yaml
     volumes:
       # Mount inventory and credentials from host (create these files first)
-      - ./pathtracer/inventory.yaml:/app/pathtracer/inventory.yaml:ro
-      - ./pathtracer/credentials.yaml:/app/pathtracer/credentials.yaml:ro
+      - ./services/pathtrace-api/pathtracer/inventory.yaml:/app/pathtracer/inventory.yaml:ro
+      - ./services/pathtrace-api/pathtracer/credentials.yaml:/app/pathtracer/credentials.yaml:ro
     cap_add:
       - NET_RAW
       - NET_ADMIN
@@ -53,12 +53,12 @@ services:
       - fak-network
     restart: unless-stopped
 
-  # iPerf Server Backend (Go)
-  iperf-backend:
+  # iPerf Server API (Go)
+  iperf-api:
     build:
-      context: ./backend
+      context: ./services/iperf-api
       dockerfile: Dockerfile
-    container_name: fak-iperf-backend
+    container_name: fak-iperf-api
     ports:
       - "8082:8080"
       - "5201:5201"
