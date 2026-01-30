@@ -24,7 +24,8 @@ class DeviceInventory:
             inventory_file: Path to inventory file (YAML or JSON)
         """
         self.devices: List[NetworkDevice] = []
-        self.subnet_map: Dict[str, NetworkDevice] = {}
+        self.subnet_map: Dict[str, List[NetworkDevice]] = {}
+        self._load_warnings: List[str] = []
 
         if inventory_file:
             self.load_from_file(inventory_file)
@@ -52,9 +53,10 @@ class DeviceInventory:
         devices_data = data.get('devices', [])
         for device_data in devices_data:
             device = NetworkDevice(
-                hostname=device_data['hostname'],
-                management_ip=device_data['management_ip'],
-                vendor=device_data['vendor'],
+                hostname=device_data.get('hostname', ''),
+                management_ip=device_data.get('management_ip', ''),
+                vendor=device_data.get('vendor', ''),
+                site=device_data.get('site'),
                 device_type=device_data.get('device_type', 'unknown'),
                 credentials_ref=device_data.get('credentials_ref', 'default'),
                 logical_contexts=device_data.get('logical_contexts', [device_data.get('default_vrf', 'global')]),
@@ -66,33 +68,38 @@ class DeviceInventory:
 
         logger.info(f"Loaded {len(self.devices)} devices from inventory")
 
-    def add_device(self, device: NetworkDevice):
+    def add_device(self, device: NetworkDevice) -> None:
         """
         Add device to inventory.
 
         Args:
             device: NetworkDevice to add
         """
+        # Detect duplicate management IPs
+        for existing in self.devices:
+            if existing.management_ip == device.management_ip and existing.hostname != device.hostname:
+                warning = f"Duplicate management IP {device.management_ip}: {existing.hostname} and {device.hostname}"
+                self._load_warnings.append(warning)
+                logger.warning(warning)
+
         self.devices.append(device)
 
-        # Map subnets to device for quick lookup
         for subnet in device.subnets:
-            self.subnet_map[subnet] = device
+            if subnet not in self.subnet_map:
+                self.subnet_map[subnet] = []
+            else:
+                # Check for same-site overlap
+                existing_devices = self.subnet_map[subnet]
+                for existing in existing_devices:
+                    if existing.site and device.site and existing.site == device.site:
+                        warning = f"Overlapping subnet {subnet} at site {device.site}: {existing.hostname} and {device.hostname}"
+                        self._load_warnings.append(warning)
+                        logger.warning(warning)
+            self.subnet_map[subnet].append(device)
 
-    def find_device_by_ip(self, ip: str) -> Optional[NetworkDevice]:
-        """
-        Find device by management IP.
-
-        Args:
-            ip: Management IP address
-
-        Returns:
-            NetworkDevice or None
-        """
-        for device in self.devices:
-            if device.management_ip == ip:
-                return device
-        return None
+    def find_device_by_ip(self, ip: str) -> List[NetworkDevice]:
+        """Find all devices with this management IP."""
+        return [d for d in self.devices if d.management_ip == ip]
 
     def find_device_by_hostname(self, hostname: str) -> Optional[NetworkDevice]:
         """
@@ -109,27 +116,32 @@ class DeviceInventory:
                 return device
         return None
 
-    def find_device_for_subnet(self, ip: str) -> Optional[NetworkDevice]:
-        """
-        Find device that owns the subnet containing the IP.
+    def find_device_for_subnet(self, ip: str) -> List[NetworkDevice]:
+        """Find all devices owning a subnet that contains this IP, using longest prefix match."""
+        from pathtracer.utils.ip_utils import get_prefix_length
 
-        Args:
-            ip: IP address to search for
-
-        Returns:
-            NetworkDevice that owns the subnet, or None
-        """
-        # Check subnet map
-        for subnet, device in self.subnet_map.items():
+        matches: List[tuple] = []  # (prefix_length, device)
+        for subnet, devices in self.subnet_map.items():
             if ip_in_network(ip, subnet):
-                logger.debug(f"Found device {device.hostname} for IP {ip} in subnet {subnet}")
-                return device
+                prefix_len = get_prefix_length(subnet)
+                for device in devices:
+                    matches.append((prefix_len, device))
 
-        return None
+        if not matches:
+            return []
+
+        # Find the longest prefix length
+        longest = max(m[0] for m in matches)
+        # Return only devices at the longest prefix length
+        return [d for plen, d in matches if plen == longest]
 
     def get_all_devices(self) -> List[NetworkDevice]:
         """Get all devices in inventory."""
         return self.devices
+
+    def get_warnings(self) -> List[str]:
+        """Return any warnings generated during inventory loading."""
+        return list(self._load_warnings)
 
     def export_to_dict(self) -> Dict:
         """
@@ -144,6 +156,7 @@ class DeviceInventory:
                     'hostname': dev.hostname,
                     'management_ip': dev.management_ip,
                     'vendor': dev.vendor,
+                    'site': dev.site,
                     'device_type': dev.device_type,
                     'credentials_ref': dev.credentials_ref,
                     'logical_contexts': dev.logical_contexts,
