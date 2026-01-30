@@ -5,16 +5,17 @@ Provides both ICMP traceroute and device-based path tracing with optional NetBox
 Requires: scapy, requests, flask, netmiko, pyyaml
 """
 
+import os
+import socket
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from scapy.all import sr1, IP, ICMP, conf
 import requests
-import socket
-import time
-import os
-import sys
-from datetime import datetime
-from pathlib import Path
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend access
@@ -478,4 +479,4 @@ def health():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=os.getenv('FLASK_DEBUG', 'false').lower() == 'true')
