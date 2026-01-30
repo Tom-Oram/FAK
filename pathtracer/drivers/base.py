@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import List, Dict, Optional
-from ..models import RouteEntry, NetworkDevice, CredentialSet
+from ..models import RouteEntry, NetworkDevice, CredentialSet, InterfaceDetail, PolicyResult, NatResult
 
 
 class NetworkDriver(ABC):
@@ -112,6 +112,29 @@ class NetworkDriver(ABC):
             CommandError: If command execution fails
         """
         pass
+
+    def get_interface_detail(self, interface_name: str) -> Optional['InterfaceDetail']:
+        """Get operational detail for an interface. Override in subclass."""
+        return None
+
+    def get_zone_for_interface(self, interface_name: str) -> Optional[str]:
+        """Get security zone for an interface. Firewall drivers override this."""
+        return None
+
+    def lookup_security_policy(
+        self, source_ip: str, dest_ip: str,
+        protocol: str, port: int,
+        source_zone: str, dest_zone: str
+    ) -> Optional['PolicyResult']:
+        """Find matching firewall rule. Firewall drivers override this."""
+        return None
+
+    def lookup_nat(
+        self, source_ip: str, dest_ip: str,
+        protocol: str, port: int
+    ) -> Optional['NatResult']:
+        """Find NAT translations. Firewall drivers override this."""
+        return None
 
     def is_connected(self) -> bool:
         """Check if connected to device."""
