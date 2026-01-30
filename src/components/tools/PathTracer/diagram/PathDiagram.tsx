@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DeviceHop } from '../types';
 import PathNode from './PathNode';
 import PathConnector from './PathConnector';
@@ -12,7 +12,15 @@ interface PathDiagramProps {
 export default function PathDiagram({ hops, totalPathMs }: PathDiagramProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const selectedHop = hops[selectedIndex];
+  // Clamp selectedIndex when hops array changes length
+  useEffect(() => {
+    if (selectedIndex >= hops.length && hops.length > 0) {
+      setSelectedIndex(hops.length - 1);
+    }
+  }, [hops.length, selectedIndex]);
+
+  const safeIndex = Math.min(selectedIndex, hops.length - 1);
+  const selectedHop = hops[safeIndex];
 
   // Pre-compute cumulative latencies
   const cumulativeMs = useMemo(() => {
@@ -35,7 +43,7 @@ export default function PathDiagram({ hops, totalPathMs }: PathDiagramProps) {
           <div key={hop.sequence}>
             <PathNode
               hop={hop}
-              isSelected={index === selectedIndex}
+              isSelected={index === safeIndex}
               onClick={() => setSelectedIndex(index)}
             />
             {index < hops.length - 1 && (
@@ -52,7 +60,7 @@ export default function PathDiagram({ hops, totalPathMs }: PathDiagramProps) {
             <HopDetailPanel
               key={selectedHop.sequence}
               hop={selectedHop}
-              cumulativeMs={cumulativeMs[selectedIndex]}
+              cumulativeMs={cumulativeMs[safeIndex]}
               totalPathMs={totalPathMs}
             />
           )}

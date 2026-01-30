@@ -54,6 +54,24 @@ export default function DeviceSection({ hop }: DeviceSectionProps) {
                   <dd className="text-sm text-slate-900 dark:text-white">{hop.logical_context}</dd>
                 </div>
               )}
+              {hop.device.netbox?.role && (
+                <div>
+                  <dt className="text-xs text-slate-500 dark:text-slate-400">Role</dt>
+                  <dd className="text-sm text-slate-900 dark:text-white">{hop.device.netbox.role}</dd>
+                </div>
+              )}
+              {hop.device.netbox?.platform && (
+                <div>
+                  <dt className="text-xs text-slate-500 dark:text-slate-400">Platform</dt>
+                  <dd className="text-sm text-slate-900 dark:text-white">{hop.device.netbox.platform}</dd>
+                </div>
+              )}
+              {hop.device.netbox?.status && (
+                <div>
+                  <dt className="text-xs text-slate-500 dark:text-slate-400">Status</dt>
+                  <dd className="text-sm text-slate-900 dark:text-white">{hop.device.netbox.status}</dd>
+                </div>
+              )}
             </div>
           </div>
         </div>

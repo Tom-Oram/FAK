@@ -50,11 +50,18 @@ export function LoadBalancerIcon({ className = 'w-6 h-6' }: IconProps) {
   );
 }
 
-/** Map device vendor/type strings to icon components. */
+/** Vendors classified as firewalls. */
 const FIREWALL_VENDORS = new Set([
   'paloalto', 'paloalto_panos', 'cisco_asa', 'cisco_ftd',
   'juniper_srx', 'fortinet',
 ]);
+
+/** Check if a vendor/type combination is a firewall. */
+export function isFirewallDevice(vendor: string, deviceType?: string): boolean {
+  return FIREWALL_VENDORS.has(vendor) || deviceType === 'firewall';
+}
+
+/** Map device vendor/type strings to icon components. */
 
 export function getDeviceIcon(vendor: string, deviceType?: string): React.FC<IconProps> {
   if (FIREWALL_VENDORS.has(vendor) || deviceType === 'firewall') {

@@ -57,12 +57,20 @@ export default function ForwardingSection({ hop }: ForwardingSectionProps) {
               </div>
             </div>
           </div>
-          {hop.egress_interface && (
-            <div className="mt-2">
-              <dt className="text-xs text-slate-500 dark:text-slate-400">Egress Interface</dt>
-              <dd className="text-sm font-mono text-slate-900 dark:text-white">{hop.egress_interface}</dd>
-            </div>
-          )}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 mt-2">
+            {hop.logical_context && hop.logical_context !== 'global' && hop.logical_context !== 'default' && (
+              <div>
+                <dt className="text-xs text-slate-500 dark:text-slate-400">VRF / Context</dt>
+                <dd className="text-sm text-slate-900 dark:text-white">{hop.logical_context}</dd>
+              </div>
+            )}
+            {hop.egress_interface && (
+              <div>
+                <dt className="text-xs text-slate-500 dark:text-slate-400">Egress Interface</dt>
+                <dd className="text-sm font-mono text-slate-900 dark:text-white">{hop.egress_interface}</dd>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

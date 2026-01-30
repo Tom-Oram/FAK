@@ -1,21 +1,12 @@
 // src/components/tools/PathTracer/diagram/PathNode.tsx
 import { Shield } from 'lucide-react';
 import { DeviceHop } from '../types';
-import { getDeviceIcon } from './icons';
+import { getDeviceIcon, isFirewallDevice } from './icons';
 
 interface PathNodeProps {
   hop: DeviceHop;
   isSelected: boolean;
   onClick: () => void;
-}
-
-const FIREWALL_VENDORS = new Set([
-  'paloalto', 'paloalto_panos', 'cisco_asa', 'cisco_ftd',
-  'juniper_srx', 'fortinet',
-]);
-
-function isFirewall(hop: DeviceHop): boolean {
-  return FIREWALL_VENDORS.has(hop.device.vendor) || hop.device.device_type === 'firewall';
 }
 
 export default function PathNode({ hop, isSelected, onClick }: PathNodeProps) {
@@ -35,7 +26,7 @@ export default function PathNode({ hop, isSelected, onClick }: PathNodeProps) {
       {/* Device icon with optional firewall overlay */}
       <div className="relative flex-shrink-0">
         <DeviceIcon className={`w-8 h-8 ${isSelected ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400'}`} />
-        {isFirewall(hop) && (
+        {isFirewallDevice(hop.device.vendor, hop.device.device_type) && (
           <Shield className="absolute -top-1 -right-1 w-3.5 h-3.5 text-warning-500" />
         )}
       </div>
