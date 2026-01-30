@@ -64,8 +64,8 @@ export default function PathTracer() {
     try {
       // Choose API endpoint based on mode
       const endpoint = traceMode === 'device-based'
-        ? '/api/traceroute/device-based'
-        : '/api/traceroute';
+        ? '/pathtrace/api/traceroute/device-based'
+        : '/pathtrace/api/traceroute';
 
       const requestBody: TraceRequestBody = {
         source: sourceIp,
@@ -156,7 +156,7 @@ export default function PathTracer() {
     setIsTracing(true);
 
     try {
-      const response = await fetch('/api/traceroute/device-based', {
+      const response = await fetch('/pathtrace/api/traceroute/device-based', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

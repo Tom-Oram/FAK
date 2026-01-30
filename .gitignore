@@ -30,9 +30,9 @@ yarn-error.log*
 coverage/
 
 # Go build artifacts
-backend/server
-backend/main
-backend/data/
+services/iperf-api/server
+services/iperf-api/main
+services/iperf-api/data/
 
 # TypeScript cache
 *.tsbuildinfo
