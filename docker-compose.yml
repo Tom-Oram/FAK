@@ -12,6 +12,8 @@ services:
     networks:
       - fak-network
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       - backend
       - iperf-backend
@@ -37,7 +39,11 @@ services:
       # Mount inventory and credentials from host (create these files first)
       - ./pathtracer/inventory.yaml:/app/pathtracer/inventory.yaml:ro
       - ./pathtracer/credentials.yaml:/app/pathtracer/credentials.yaml:ro
-    privileged: true  # Required for raw socket access (traceroute) and SSH
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
     networks:
       - fak-network
     restart: unless-stopped
@@ -65,6 +71,8 @@ services:
     networks:
       - fak-network
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
 
 networks:
   fak-network:
