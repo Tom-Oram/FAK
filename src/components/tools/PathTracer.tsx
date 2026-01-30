@@ -234,33 +234,36 @@ export default function PathTracer() {
       });
 
       if (!response.ok) {
-        throw new Error(`Trace failed: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API returned ${response.status}`);
       }
 
       const data = await response.json();
 
       // Stitch the continuation onto the existing partial path
-      const existingHops = traceResult.hops as DeviceHop[];
-      const continuationHops = (data.hops || []).map((hop: DeviceHop, i: number) => ({
-        ...hop,
-        sequence: existingHops.length + i + 1,
-      }));
-
-      setTraceResult({
-        ...traceResult,
-        hops: [...existingHops, ...continuationHops],
-        status: data.status,
-        error_message: data.error_message,
-        endTime: data.endTime ? new Date(data.endTime) : undefined,
-        hop_count: existingHops.length + (data.hop_count || 0),
-        total_time_ms: (traceResult.total_time_ms || 0) + (data.total_time_ms || 0),
-        candidates: data.candidates,
-        ambiguous_hop_sequence: data.ambiguous_hop_sequence,
+      setTraceResult((prev) => {
+        if (!prev) return null;
+        const existingHops = prev.hops as DeviceHop[];
+        const continuationHops = (data.hops || []).map((hop: DeviceHop, i: number) => ({
+          ...hop,
+          sequence: existingHops.length + i + 1,
+        }));
+        return {
+          ...prev,
+          hops: [...existingHops, ...continuationHops],
+          status: data.status,
+          error_message: data.error_message,
+          endTime: data.endTime ? new Date(data.endTime) : undefined,
+          hop_count: existingHops.length + (data.hop_count || 0),
+          total_time_ms: (prev.total_time_ms || 0) + (data.total_time_ms || 0),
+          candidates: data.candidates,
+          ambiguous_hop_sequence: data.ambiguous_hop_sequence,
+        };
       });
     } catch (err) {
       setTraceResult((prev) =>
         prev
-          ? { ...prev, status: 'error', error: String(err) }
+          ? { ...prev, status: 'error', error: err instanceof Error ? err.message : 'Trace failed' }
           : null
       );
     } finally {
