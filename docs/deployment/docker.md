@@ -11,8 +11,8 @@ docker compose up -d
 | Service | Port | Description |
 |---------|------|-------------|
 | frontend | 8081 | Nginx serving React app |
-| backend | 5000 | Python API (traceroute) |
-| iperf-backend | 8082 | Go API (iPerf server) |
+| pathtrace-api | 5000 | Python API (traceroute) |
+| iperf-api | 8082 | Go API (iPerf server) |
 
 ## Configuration
 
@@ -38,8 +38,8 @@ PATHTRACE_SECRET=your_enable_secret
 ```
 
 The device inventory and credentials files are mounted read-only from the host:
-- `./pathtracer/inventory.yaml` → `/app/pathtracer/inventory.yaml`
-- `./pathtracer/credentials.yaml` → `/app/pathtracer/credentials.yaml`
+- `./services/pathtrace-api/pathtracer/inventory.yaml` → `/app/pathtracer/inventory.yaml`
+- `./services/pathtrace-api/pathtracer/credentials.yaml` → `/app/pathtracer/credentials.yaml`
 
 ## Building Images
 
@@ -58,5 +58,5 @@ docker compose build frontend
 docker compose logs -f
 
 # Specific service
-docker compose logs -f iperf-backend
+docker compose logs -f iperf-api
 ```

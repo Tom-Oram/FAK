@@ -72,7 +72,7 @@ Device-based traces display an interactive two-column layout:
 
 ### Device Inventory
 
-Create `pathtracer/inventory.yaml` with your network devices:
+Create `services/pathtrace-api/pathtracer/inventory.yaml` with your network devices:
 
 ```yaml
 devices:
@@ -86,17 +86,17 @@ devices:
       - VRF_CORP
 ```
 
-See `pathtracer/README.md` for full inventory format and vendor configuration.
+See `services/pathtrace-api/pathtracer/README.md` for full inventory format and vendor configuration.
 
 ## API Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/traceroute` | POST | ICMP traceroute |
-| `/api/traceroute/device-based` | POST | Device-based path trace |
+| `/pathtrace/api/traceroute` | POST | ICMP traceroute |
+| `/pathtrace/api/traceroute/device-based` | POST | Device-based path trace |
 | `/health` | GET | Health check |
 
-See `api/README.md` for full request/response documentation.
+See `services/pathtrace-api/README.md` for full request/response documentation.
 
 ## When to Use Each Mode
 

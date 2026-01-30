@@ -11,7 +11,7 @@ Python Flask backend providing ICMP traceroute and device-based path tracing wit
 
 ## API Endpoints
 
-### POST /api/traceroute
+### POST /pathtrace/api/traceroute
 
 ICMP traceroute using Scapy.
 
@@ -49,7 +49,7 @@ ICMP traceroute using Scapy.
 }
 ```
 
-### POST /api/traceroute/device-based
+### POST /pathtrace/api/traceroute/device-based
 
 Device-based path tracing via SSH to network devices.
 
@@ -127,15 +127,14 @@ Returns `{"status": "ok", "service": "traceroute-api"}`.
 
 ## Docker Deployment
 
-The API is deployed as the `backend` service in `docker-compose.yml`. It runs with `NET_RAW` and `NET_ADMIN` capabilities for ICMP raw socket access.
+The API is deployed as the `pathtrace-api` service in `docker-compose.yml`. It runs with `NET_RAW` and `NET_ADMIN` capabilities for ICMP raw socket access.
 
 ## Local Development
 
 ```bash
-cd api
+cd services/pathtrace-api
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-pip install -r ../pathtracer/requirements.txt  # device-based tracing deps
 FLASK_DEBUG=true python traceroute.py
 ```

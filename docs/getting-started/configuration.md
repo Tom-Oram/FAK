@@ -17,7 +17,7 @@ cp .env.example .env
 
 > **Note:** In production (Docker Compose), the frontend is served by nginx which proxies API requests internally. These variables are only used during `npm run dev`.
 
-### Backend Variables
+### iPerf API Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
