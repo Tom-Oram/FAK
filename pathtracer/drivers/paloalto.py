@@ -9,6 +9,7 @@ from netmiko.exceptions import NetmikoTimeoutException, NetmikoAuthenticationExc
 from .base import NetworkDriver
 from ..models import (
     RouteEntry, NetworkDevice, CredentialSet, InterfaceDetail,
+    PolicyResult, NatResult,
     DeviceConnectionError, AuthenticationError, CommandError
 )
 from ..parsers.paloalto_parser import PaloAltoParser
@@ -270,4 +271,101 @@ class PaloAltoDriver(NetworkDriver):
             return self.parser.parse_zone_from_interface(output)
         except Exception as e:
             logger.warning(f"Failed to get zone for interface {interface_name}: {e}")
+            return None
+
+    @staticmethod
+    def _protocol_number(protocol: str) -> str:
+        """
+        Map protocol name to IANA protocol number string.
+
+        Args:
+            protocol: Protocol name (e.g. 'tcp', 'udp', 'icmp')
+
+        Returns:
+            Protocol number as string, or the original value if not mapped
+        """
+        protocol_map = {
+            "tcp": "6",
+            "udp": "17",
+            "icmp": "1",
+        }
+        return protocol_map.get(protocol.lower(), protocol)
+
+    def lookup_security_policy(
+        self, source_ip: str, dest_ip: str,
+        protocol: str, port: int,
+        source_zone: str, dest_zone: str
+    ) -> Optional[PolicyResult]:
+        """
+        Find matching security policy rule for the given traffic parameters.
+
+        Uses 'test security-policy-match' PAN-OS command.
+
+        Args:
+            source_ip: Source IP address
+            dest_ip: Destination IP address
+            protocol: Protocol name (tcp, udp, icmp)
+            port: Destination port number
+            source_zone: Source security zone
+            dest_zone: Destination security zone
+
+        Returns:
+            PolicyResult or None if not found or on error
+        """
+        if not self._connected:
+            return None
+
+        try:
+            proto_num = self._protocol_number(protocol)
+            command = (
+                f"test security-policy-match"
+                f" source {source_ip}"
+                f" destination {dest_ip}"
+                f" protocol {proto_num}"
+                f" destination-port {port}"
+                f" from {source_zone}"
+                f" to {dest_zone}"
+            )
+            logger.debug(f"Executing: {command}")
+            output = self.connection.send_command(command)
+            return self.parser.parse_security_policy_match(output)
+        except Exception as e:
+            logger.warning(f"Failed to lookup security policy: {e}")
+            return None
+
+    def lookup_nat(
+        self, source_ip: str, dest_ip: str,
+        protocol: str, port: int
+    ) -> Optional[NatResult]:
+        """
+        Find NAT translations for the given traffic parameters.
+
+        Uses 'test nat-policy-match' PAN-OS command.
+
+        Args:
+            source_ip: Source IP address
+            dest_ip: Destination IP address
+            protocol: Protocol name (tcp, udp, icmp)
+            port: Destination port number
+
+        Returns:
+            NatResult or None if not found or on error
+        """
+        if not self._connected:
+            return None
+
+        try:
+            proto_num = self._protocol_number(protocol)
+            command = (
+                f"test nat-policy-match"
+                f" source {source_ip}"
+                f" destination {dest_ip}"
+                f" protocol {proto_num}"
+                f" destination-port {port}"
+            )
+            logger.debug(f"Executing: {command}")
+            output = self.connection.send_command(command)
+            return self.parser.parse_nat_policy_match(output)
+        except Exception as e:
+            logger.warning(f"Failed to lookup NAT policy: {e}")
             return None

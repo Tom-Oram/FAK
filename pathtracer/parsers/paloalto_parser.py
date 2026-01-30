@@ -2,7 +2,7 @@
 
 import re
 from typing import List, Optional
-from ..models import RouteEntry, NextHopType, InterfaceDetail
+from ..models import RouteEntry, NextHopType, InterfaceDetail, PolicyResult, NatResult, NatTranslation
 
 
 class PaloAltoParser:
@@ -356,3 +356,167 @@ class PaloAltoParser:
                 return match.group(1).strip()
 
         return None
+
+    @staticmethod
+    def parse_security_policy_match(output: str) -> Optional[PolicyResult]:
+        """
+        Parse 'test security-policy-match' output from PAN-OS.
+
+        Expected format:
+        "Allow-Web" {
+                from trust;
+                source 10.0.0.0/8;
+                source-region none;
+                to untrust;
+                destination any;
+                destination-region none;
+                category any;
+                application/service any/tcp/any/443;
+                action allow;
+                icmp-unreachable: no
+                terminal yes;
+        }
+
+        Args:
+            output: Raw command output
+
+        Returns:
+            PolicyResult or None if no match found
+        """
+        if not output or not output.strip():
+            return None
+
+        # Extract rule name from the quoted string on the first line
+        rule_match = re.search(r'"([^"]+)"', output)
+        if not rule_match:
+            return None
+
+        rule_name = rule_match.group(1)
+
+        # Extract source zone (from <zone>;)
+        source_zone = ""
+        from_match = re.search(r'^\s*from\s+(\S+?);', output, re.MULTILINE)
+        if from_match:
+            source_zone = from_match.group(1)
+
+        # Extract dest zone (to <zone>;)
+        dest_zone = ""
+        to_match = re.search(r'^\s*to\s+(\S+?);', output, re.MULTILINE)
+        if to_match:
+            dest_zone = to_match.group(1)
+
+        # Extract source addresses (source <addr>;) - skip source-region
+        source_addresses = []
+        source_match = re.search(r'^\s*source\s+(.+?);', output, re.MULTILINE)
+        if source_match:
+            source_addresses = [s.strip() for s in source_match.group(1).split() if s.strip()]
+
+        # Extract destination addresses (destination <addr>;) - skip destination-region
+        dest_addresses = []
+        dest_match = re.search(r'^\s*destination\s+(.+?);', output, re.MULTILINE)
+        if dest_match:
+            dest_addresses = [s.strip() for s in dest_match.group(1).split() if s.strip()]
+
+        # Extract services (application/service <value>;)
+        services = []
+        svc_match = re.search(r'application/service\s+(.+?);', output)
+        if svc_match:
+            services = [svc_match.group(1).strip()]
+
+        # Extract action and map
+        action = "deny"
+        action_match = re.search(r'^\s*action\s+(\S+?);', output, re.MULTILINE)
+        if action_match:
+            raw_action = action_match.group(1).lower()
+            action_map = {"allow": "permit", "deny": "deny", "drop": "drop"}
+            action = action_map.get(raw_action, raw_action)
+
+        # Check for logging
+        logging_enabled = "log" in output.lower()
+
+        return PolicyResult(
+            rule_name=rule_name,
+            rule_position=0,
+            action=action,
+            source_zone=source_zone,
+            dest_zone=dest_zone,
+            source_addresses=source_addresses,
+            dest_addresses=dest_addresses,
+            services=services,
+            logging=logging_enabled,
+            raw_output=output,
+        )
+
+    @staticmethod
+    def parse_nat_policy_match(output: str) -> Optional[NatResult]:
+        """
+        Parse 'test nat-policy-match' output from PAN-OS.
+
+        Expected format:
+        Matched NAT rule: "Internet-SNAT"
+          Source translation: 10.1.1.100 ==> 203.0.113.5
+          Destination translation: none
+
+        Or with port:
+          Source translation: 10.1.1.100:8080 ==> 203.0.113.5:80
+
+        Args:
+            output: Raw command output
+
+        Returns:
+            NatResult or None if no match found
+        """
+        if not output or not output.strip():
+            return None
+
+        # Extract rule name
+        rule_match = re.search(r'Matched NAT rule:\s*"([^"]+)"', output)
+        if not rule_match:
+            return None
+
+        rule_name = rule_match.group(1)
+
+        def parse_translation(line_value: str) -> Optional[NatTranslation]:
+            """Parse a translation line value like '10.1.1.100 ==> 203.0.113.5'."""
+            if not line_value or line_value.strip().lower() == "none":
+                return None
+
+            parts = re.match(r'(\S+)\s*==>\s*(\S+)', line_value.strip())
+            if not parts:
+                return None
+
+            original = parts.group(1)
+            translated = parts.group(2)
+
+            # Parse ip:port format
+            original_ip, original_port = _split_ip_port(original)
+            translated_ip, translated_port = _split_ip_port(translated)
+
+            return NatTranslation(
+                original_ip=original_ip,
+                original_port=original_port,
+                translated_ip=translated_ip,
+                translated_port=translated_port,
+                nat_rule_name=rule_name,
+            )
+
+        def _split_ip_port(value: str):
+            """Split 'ip:port' into (ip, port) or (ip, None)."""
+            if ':' in value:
+                parts = value.rsplit(':', 1)
+                return parts[0], parts[1]
+            return value, None
+
+        # Extract source translation
+        snat = None
+        src_match = re.search(r'Source translation:\s*(.+)', output)
+        if src_match:
+            snat = parse_translation(src_match.group(1))
+
+        # Extract destination translation
+        dnat = None
+        dst_match = re.search(r'Destination translation:\s*(.+)', output)
+        if dst_match:
+            dnat = parse_translation(dst_match.group(1))
+
+        return NatResult(snat=snat, dnat=dnat)
