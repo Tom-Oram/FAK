@@ -8,7 +8,7 @@ from netmiko.exceptions import NetmikoTimeoutException, NetmikoAuthenticationExc
 
 from .base import NetworkDriver
 from ..models import (
-    RouteEntry, NetworkDevice, CredentialSet,
+    RouteEntry, NetworkDevice, CredentialSet, InterfaceDetail,
     DeviceConnectionError, AuthenticationError, CommandError
 )
 from ..parsers.aruba_parser import ArubaParser
@@ -203,6 +203,19 @@ class ArubaDriver(NetworkDriver):
         except Exception as e:
             logger.warning(f"Failed to get interface VRF mapping: {e}")
             return {}
+
+    def get_interface_detail(self, interface_name: str) -> Optional[InterfaceDetail]:
+        """Get operational detail for an interface."""
+        if not self._connected:
+            raise DeviceConnectionError(f"Not connected to {self.device.hostname}")
+        try:
+            command = f"show interface {interface_name}"
+            logger.debug(f"Executing: {command}")
+            output = self.connection.send_command(command)
+            return self.parser.parse_interface_detail(output)
+        except Exception as e:
+            logger.warning(f"Failed to get interface detail for {interface_name}: {e}")
+            return None
 
     def detect_device_info(self) -> Dict:
         """

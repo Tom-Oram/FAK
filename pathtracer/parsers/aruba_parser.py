@@ -2,7 +2,7 @@
 
 import re
 from typing import List, Optional
-from ..models import RouteEntry, NextHopType
+from ..models import RouteEntry, NextHopType, InterfaceDetail
 
 
 class ArubaParser:
@@ -251,3 +251,128 @@ class ArubaParser:
                     interfaces[interface] = ip
 
         return interfaces
+
+    @staticmethod
+    def parse_interface_detail(output: str) -> Optional[InterfaceDetail]:
+        """
+        Parse 'show interface <name>' output for Aruba AOS-CX.
+
+        Expected format:
+            Interface 1/1/1 is up
+             Admin state is up
+             Description: Uplink
+             Hardware: Ethernet, MAC Address: 00:50:56:89:00:01
+             MTU 1500
+             Speed 1000 Mb/s
+             Full-duplex
+             Input flow-control is off, output flow-control is off
+             RX
+                 1000 input packets 640000 bytes
+                 5 input errors
+                 2 drops
+             TX
+                 2000 output packets 1280000 bytes
+                 1 output errors
+                 0 drops
+
+        Args:
+            output: Raw command output
+
+        Returns:
+            InterfaceDetail or None if output cannot be parsed
+        """
+        if not output or not output.strip():
+            return None
+
+        lines = output.strip().split('\n')
+
+        # First line: Interface name and link status
+        first_line_match = re.match(r'^Interface\s+(\S+)\s+is\s+(\S+)', lines[0])
+        if not first_line_match:
+            return None
+
+        name = first_line_match.group(1)
+        link_status = first_line_match.group(2).lower()
+
+        # Defaults
+        admin_state = "up"
+        description = ""
+        speed = ""
+        errors_in = 0
+        errors_out = 0
+        discards_in = 0
+        discards_out = 0
+
+        # Track which section (RX or TX) we are in
+        section = None
+
+        for line in lines[1:]:
+            stripped = line.strip()
+
+            # Admin state
+            admin_match = re.match(r'^Admin state is\s+(\S+)', stripped)
+            if admin_match:
+                admin_state = admin_match.group(1).lower()
+                continue
+
+            # Description
+            desc_match = re.match(r'^Description:\s+(.+)$', stripped)
+            if desc_match:
+                description = desc_match.group(1)
+                continue
+
+            # Speed
+            speed_match = re.match(r'^Speed\s+(.+)$', stripped)
+            if speed_match:
+                speed = speed_match.group(1)
+                continue
+
+            # Section markers
+            if stripped == 'RX':
+                section = 'rx'
+                continue
+            elif stripped == 'TX':
+                section = 'tx'
+                continue
+
+            # Counters within RX/TX sections
+            if section == 'rx':
+                err_match = re.match(r'^(\d+)\s+input errors', stripped)
+                if err_match:
+                    errors_in = int(err_match.group(1))
+                    continue
+                drop_match = re.match(r'^(\d+)\s+drops', stripped)
+                if drop_match:
+                    discards_in = int(drop_match.group(1))
+                    continue
+
+            elif section == 'tx':
+                err_match = re.match(r'^(\d+)\s+output errors', stripped)
+                if err_match:
+                    errors_out = int(err_match.group(1))
+                    continue
+                drop_match = re.match(r'^(\d+)\s+drops', stripped)
+                if drop_match:
+                    discards_out = int(drop_match.group(1))
+                    continue
+
+        # Determine status: admin_down takes precedence, then link status
+        if admin_state == "down":
+            status = "admin_down"
+        elif link_status == "down":
+            status = "down"
+        else:
+            status = "up"
+
+        return InterfaceDetail(
+            name=name,
+            description=description,
+            status=status,
+            speed=speed,
+            utilisation_in_pct=None,
+            utilisation_out_pct=None,
+            errors_in=errors_in,
+            errors_out=errors_out,
+            discards_in=discards_in,
+            discards_out=discards_out,
+        )
