@@ -5,7 +5,6 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Server,
   Globe,
   MapPin,
   Info,
@@ -13,7 +12,7 @@ import {
   ChevronRight,
   Activity,
 } from 'lucide-react';
-import type { ICMPHop, DeviceHop, DeviceCandidate, TraceResult } from './types';
+import type { ICMPHop, DeviceHop, DeviceCandidate, TraceResult, TraceRequestBody } from './types';
 import { PathDiagram } from './diagram';
 
 export default function PathTracer() {
@@ -68,7 +67,7 @@ export default function PathTracer() {
         ? '/api/traceroute/device-based'
         : '/api/traceroute';
 
-      const requestBody: any = {
+      const requestBody: TraceRequestBody = {
         source: sourceIp,
         destination: destinationIp,
         netboxUrl: netboxUrl || undefined,
@@ -865,52 +864,6 @@ export default function PathTracer() {
           </div>
         </div>
       )}
-
-      {/* Setup Instructions */}
-      <div className="card bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-        <div className="card-body">
-          <h3 className="font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-            <Server className="w-5 h-5 text-primary-600" />
-            Backend API Setup
-          </h3>
-          <div className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
-            <p>
-              This tool requires a Python backend API with Scapy. Create an endpoint at{' '}
-              <code className="bg-slate-200 dark:bg-slate-700 px-1 rounded">/api/traceroute</code>:
-            </p>
-            <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto text-xs">
-{`from scapy.all import sr1, IP, ICMP
-import requests
-
-def traceroute(source, destination, netbox_url=None, netbox_token=None):
-    hops = []
-    for ttl in range(1, 31):
-        pkt = IP(src=source, dst=destination, ttl=ttl) / ICMP()
-        reply = sr1(pkt, timeout=2, verbose=0)
-
-        if reply:
-            hop = {
-                "ttl": ttl,
-                "ip": reply.src,
-                "rtt": (reply.time - pkt.sent_time) * 1000
-            }
-
-            # Optional: Lookup in NetBox
-            if netbox_url and netbox_token:
-                device = lookup_netbox(reply.src, netbox_url, netbox_token)
-                if device:
-                    hop["device"] = device
-
-            hops.append(hop)
-
-            if reply.src == destination:
-                break
-
-    return hops`}
-            </pre>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

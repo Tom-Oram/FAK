@@ -114,3 +114,15 @@ export interface TraceResult {
   ambiguous_hop_sequence?: number;
   inventory_warnings?: string[];
 }
+
+export interface TraceRequestBody {
+  source: string;
+  destination: string;
+  netboxUrl?: string;
+  netboxToken?: string;
+  startDevice?: string;
+  sourceContext?: string;
+  inventoryFile?: string;
+  protocol?: string;
+  destinationPort?: number;
+}
