@@ -37,5 +37,11 @@ backend/data/
 # TypeScript cache
 *.tsbuildinfo
 
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
 # Git worktrees
 .worktrees/
