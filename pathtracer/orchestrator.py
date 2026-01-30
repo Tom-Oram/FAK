@@ -2,11 +2,13 @@
 
 import time
 import logging
-from typing import Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 from .models import (
-    TracePath, PathHop, PathStatus, NetworkDevice,
-    RoutingLoopDetected, MaxHopsExceeded, DeviceNotFoundError
+    NetworkDevice, RouteEntry, PathHop, TracePath,
+    PathStatus, ConnectionConfig, CredentialSet,
+    DeviceNotFoundError, RoutingLoopDetected, MaxHopsExceeded,
+    ResolveResult, ResolveStatus,
 )
 from .discovery import DeviceInventory
 from .credentials import CredentialManager
@@ -55,14 +57,28 @@ class PathTracer:
             if start_device:
                 current_device = self.inventory.find_device_by_hostname(start_device)
                 if not current_device:
-                    raise DeviceNotFoundError(f"Start device not found: {start_device}")
-            else:
-                current_device = self.inventory.find_device_for_subnet(source_ip)
-                if not current_device:
                     raise DeviceNotFoundError(
-                        f"No device found for source IP {source_ip}. "
-                        "Provide a start device or update inventory."
+                        f"Start device '{start_device}' not found in inventory"
                     )
+            else:
+                result = self._resolve_device(source_ip)
+                if result.status == ResolveStatus.NOT_FOUND:
+                    path.status = PathStatus.NEEDS_INPUT
+                    path.error_message = "Source IP not found in inventory. Please specify a starting device."
+                    path.metadata['candidates'] = []
+                    path.total_time_ms = (time.time() - start_time) * 1000
+                    return path
+                elif result.status == ResolveStatus.AMBIGUOUS:
+                    path.status = PathStatus.NEEDS_INPUT
+                    path.error_message = f"Source IP {source_ip} matches multiple devices. Please select a starting device."
+                    path.metadata['candidates'] = [
+                        {'hostname': c.hostname, 'management_ip': c.management_ip, 'site': c.site, 'vendor': c.vendor}
+                        for c in result.candidates
+                    ]
+                    path.total_time_ms = (time.time() - start_time) * 1000
+                    return path
+                else:
+                    current_device = result.device
 
             logger.info(f"Starting trace from {source_ip} to {destination_ip}")
             logger.info(f"Initial device: {current_device.hostname}")
@@ -142,12 +158,28 @@ class PathTracer:
                     break
 
                 # Find next hop device
-                next_device = self._find_next_device(route.next_hop)
-                if not next_device:
+                previous_hop = path.hops[-1] if path.hops else None
+                resolve_result = self._resolve_device(route.next_hop, previous_hop=previous_hop)
+
+                if resolve_result.status == ResolveStatus.NOT_FOUND:
                     path.status = PathStatus.INCOMPLETE
                     path.error_message = f"Next hop device not found for {route.next_hop}"
                     logger.warning(path.error_message)
                     break
+                elif resolve_result.status == ResolveStatus.AMBIGUOUS:
+                    path.status = PathStatus.AMBIGUOUS_HOP
+                    path.error_message = f"Next hop {route.next_hop} matches multiple devices. Please select one to continue."
+                    path.metadata['ambiguous_hop_sequence'] = hop_sequence + 1
+                    path.metadata['candidates'] = [
+                        {'hostname': c.hostname, 'management_ip': c.management_ip, 'site': c.site, 'vendor': c.vendor}
+                        for c in resolve_result.candidates
+                    ]
+                    logger.warning(path.error_message)
+                    break
+                else:
+                    next_device = resolve_result.device
+                    if resolve_result.status == ResolveStatus.RESOLVED_BY_SITE:
+                        logger.info(f"Resolved {route.next_hop} to {next_device.hostname} via site affinity ({next_device.site})")
 
                 # Determine context for next hop (simplified - assumes same context)
                 # In production, this would handle VRF transitions
@@ -224,24 +256,34 @@ class PathTracer:
 
         return driver_class(device, credentials, self.config.get('connection', {}))
 
-    def _find_next_device(self, next_hop_ip: str) -> Optional[NetworkDevice]:
-        """
-        Find device for next hop IP.
+    def _resolve_device(self, ip: str, previous_hop: Optional[PathHop] = None) -> ResolveResult:
+        """Resolve an IP to a device, with site-affinity disambiguation."""
+        # Stage 1: Find candidates by management IP
+        candidates = self.inventory.find_device_by_ip(ip)
 
-        Args:
-            next_hop_ip: Next hop IP address
+        # Stage 2: Fall back to subnet match
+        if not candidates:
+            candidates = self.inventory.find_device_for_subnet(ip)
 
-        Returns:
-            NetworkDevice or None
-        """
-        # Try exact match on management IP first
-        device = self.inventory.find_device_by_ip(next_hop_ip)
-        if device:
-            return device
+        # Stage 3: Evaluate
+        if len(candidates) == 0:
+            return ResolveResult(device=None, status=ResolveStatus.NOT_FOUND, candidates=[])
 
-        # Try subnet match
-        device = self.inventory.find_device_for_subnet(next_hop_ip)
-        return device
+        if len(candidates) == 1:
+            return ResolveResult(device=candidates[0], status=ResolveStatus.RESOLVED, candidates=candidates)
+
+        # Stage 4: Disambiguate by site affinity
+        if previous_hop and previous_hop.device.site:
+            same_site = [c for c in candidates if c.site == previous_hop.device.site]
+            if len(same_site) == 1:
+                return ResolveResult(device=same_site[0], status=ResolveStatus.RESOLVED_BY_SITE, candidates=candidates)
+            if len(same_site) > 1:
+                return ResolveResult(device=None, status=ResolveStatus.AMBIGUOUS, candidates=same_site)
+            # No devices at the same site - return all as ambiguous
+            return ResolveResult(device=None, status=ResolveStatus.AMBIGUOUS, candidates=candidates)
+
+        # No previous hop context (source IP case) - ambiguous
+        return ResolveResult(device=None, status=ResolveStatus.AMBIGUOUS, candidates=candidates)
 
     def _determine_next_context(self, current_device: NetworkDevice, current_context: str,
                                 next_device: NetworkDevice, route) -> str:
