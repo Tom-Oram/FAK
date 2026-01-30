@@ -14,6 +14,9 @@ class DeviceVendor(Enum):
     PALO_ALTO = "paloalto"
     ARUBA = "aruba"
     FORTINET = "fortinet"
+    CISCO_ASA = "cisco_asa"
+    CISCO_FTD = "cisco_ftd"
+    JUNIPER_SRX = "juniper_srx"
 
 
 class DeviceType(Enum):
@@ -107,6 +110,12 @@ class PathHop:
     route_used: Optional[RouteEntry] = None
     lookup_time_ms: float = 0.0
     notes: str = ""
+    # Phase 2: enrichment fields
+    resolve_status: Optional[str] = None
+    ingress_detail: Optional['InterfaceDetail'] = None
+    egress_detail: Optional['InterfaceDetail'] = None
+    policy_result: Optional['PolicyResult'] = None
+    nat_result: Optional['NatResult'] = None
 
     def __str__(self):
         return (f"Hop {self.sequence}: {self.device.hostname} "
@@ -143,6 +152,63 @@ class ResolveResult:
     device: Optional[NetworkDevice]
     status: ResolveStatus
     candidates: List[NetworkDevice] = field(default_factory=list)
+
+
+@dataclass
+class PolicyResult:
+    """Matched firewall security policy/rule."""
+    rule_name: str
+    rule_position: int
+    action: str                    # permit, deny, drop
+    source_zone: str
+    dest_zone: str
+    source_addresses: List[str]
+    dest_addresses: List[str]
+    services: List[str]
+    logging: bool
+    raw_output: str = ""
+
+
+@dataclass
+class NatTranslation:
+    """One direction of NAT translation."""
+    original_ip: str
+    original_port: Optional[str]
+    translated_ip: str
+    translated_port: Optional[str]
+    nat_rule_name: str = ""
+
+
+@dataclass
+class NatResult:
+    """NAT lookup result with separate SNAT and DNAT."""
+    snat: Optional[NatTranslation] = None
+    dnat: Optional[NatTranslation] = None
+
+
+@dataclass
+class InterfaceDetail:
+    """Interface operational detail."""
+    name: str
+    description: str = ""
+    status: str = "unknown"             # up, down, admin_down
+    speed: str = ""                     # 1G, 10G, 100G, etc.
+    utilisation_in_pct: Optional[float] = None
+    utilisation_out_pct: Optional[float] = None
+    errors_in: int = 0
+    errors_out: int = 0
+    discards_in: int = 0
+    discards_out: int = 0
+
+
+@dataclass
+class HopQueryResult:
+    """Result of querying a device for a single hop."""
+    route: Optional[RouteEntry]
+    egress_detail: Optional[InterfaceDetail] = None
+    ingress_detail: Optional[InterfaceDetail] = None
+    policy_result: Optional[PolicyResult] = None
+    nat_result: Optional[NatResult] = None
 
 
 @dataclass
