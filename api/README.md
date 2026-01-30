@@ -1,38 +1,19 @@
 # Path Tracer API
 
-Python backend API for performing layer 3 traceroute with NetBox device lookup integration.
+Python Flask backend providing ICMP traceroute and device-based path tracing with optional NetBox enrichment.
 
 ## Requirements
 
 - Python 3.8+
-- Root/sudo privileges (required for raw socket access by Scapy)
-- NetBox instance (optional, for device lookup)
-
-## Installation
-
-```bash
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-## Running the API
-
-```bash
-# Run with sudo (required for Scapy raw sockets)
-sudo venv/bin/python traceroute.py
-
-# API will be available at http://localhost:5000
-```
+- System packages: `libpcap-dev`, `tcpdump`, `openssh-client`
+- For ICMP: `NET_RAW` capability (handled by Docker Compose)
+- For device-based: device inventory and SSH credentials
 
 ## API Endpoints
 
 ### POST /api/traceroute
 
-Perform a traceroute from source to destination IP.
+ICMP traceroute using Scapy.
 
 **Request:**
 ```json
@@ -47,83 +28,113 @@ Perform a traceroute from source to destination IP.
 **Response:**
 ```json
 {
+  "mode": "icmp",
   "hops": [
     {
       "ttl": 1,
       "ip": "192.168.1.1",
       "hostname": "router.local",
       "rtt": 1.23,
+      "timeout": false,
       "device": {
         "name": "core-router-01",
         "site": "datacenter-1",
-        "role": "Core Router",
-        "platform": "Cisco IOS",
-        "status": "Active"
+        "role": "Core Router"
       }
     }
   ],
-  "startTime": "2024-01-14T10:00:00Z",
-  "endTime": "2024-01-14T10:00:05Z",
+  "startTime": "2026-01-30T10:00:00Z",
+  "endTime": "2026-01-30T10:00:05Z",
   "hopCount": 10
+}
+```
+
+### POST /api/traceroute/device-based
+
+Device-based path tracing via SSH to network devices.
+
+**Request:**
+```json
+{
+  "source": "10.10.5.100",
+  "destination": "192.168.100.50",
+  "startDevice": "core-rtr-01",
+  "sourceContext": "VRF_CORP",
+  "protocol": "tcp",
+  "destinationPort": 443,
+  "netboxUrl": "https://netbox.example.com",
+  "netboxToken": "your-api-token"
+}
+```
+
+All fields except `source` and `destination` are optional.
+
+**Response:**
+```json
+{
+  "mode": "device-based",
+  "source_ip": "10.10.5.100",
+  "destination_ip": "192.168.100.50",
+  "status": "complete",
+  "hop_count": 3,
+  "total_time_ms": 4230,
+  "hops": [
+    {
+      "sequence": 1,
+      "device": {
+        "hostname": "core-rtr-01",
+        "management_ip": "10.1.1.1",
+        "vendor": "cisco_ios",
+        "device_type": "router",
+        "site": "dc-1"
+      },
+      "ingress_interface": null,
+      "egress_interface": "GigabitEthernet0/1",
+      "logical_context": "global",
+      "lookup_time_ms": 1420,
+      "route": {
+        "destination": "192.168.100.0/24",
+        "next_hop": "10.1.1.5",
+        "protocol": "ospf",
+        "metric": 20,
+        "preference": 110
+      },
+      "ingress_detail": null,
+      "egress_detail": null,
+      "policy_result": null,
+      "nat_result": null
+    }
+  ]
 }
 ```
 
 ### GET /health
 
-Health check endpoint.
+Returns `{"status": "ok", "service": "traceroute-api"}`.
 
-## NetBox Integration
+## Environment Variables
 
-The API can look up device information from NetBox for each hop:
-
-1. Searches for the hop's IP address in NetBox IPAM
-2. If found and assigned to a device, retrieves device details
-3. Returns device name, site, role, platform, and status
-
-**Required NetBox Permissions:**
-- Read access to IPAM (IP addresses)
-- Read access to DCIM (devices)
+| Variable | Description |
+|----------|-------------|
+| `FLASK_ENV` | `production` or `development` |
+| `FLASK_DEBUG` | Set to `true` to enable debug mode (default: `false`) |
+| `NETBOX_URL` | NetBox instance URL |
+| `NETBOX_TOKEN` | NetBox API token |
+| `PATHTRACE_USER` | SSH username for device tracing |
+| `PATHTRACE_PASS` | SSH password |
+| `PATHTRACE_SECRET` | Enable secret (Cisco) |
+| `PATHTRACE_INVENTORY` | Path to inventory YAML file |
 
 ## Docker Deployment
 
-```dockerfile
-FROM python:3.11-slim
+The API is deployed as the `backend` service in `docker-compose.yml`. It runs with `NET_RAW` and `NET_ADMIN` capabilities for ICMP raw socket access.
 
-# Install libpcap for Scapy
-RUN apt-get update && apt-get install -y libpcap-dev && rm -rf /var/lib/apt/lists/*
+## Local Development
 
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY traceroute.py .
-
-# Run as root (required for raw sockets)
-CMD ["python", "traceroute.py"]
+```bash
+cd api
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+FLASK_DEBUG=true python traceroute.py
 ```
-
-## Security Considerations
-
-- This API requires root privileges due to raw socket usage
-- Run in an isolated environment
-- Use firewall rules to restrict access
-- Validate and sanitize all inputs
-- Consider rate limiting to prevent abuse
-- Use HTTPS in production
-- Store NetBox tokens securely (never in frontend code)
-
-## Troubleshooting
-
-**"Operation not permitted" errors:**
-- Ensure running with sudo/root privileges
-- On Linux, you can set capabilities: `sudo setcap cap_net_raw=eip $(which python3)`
-
-**Timeouts or no responses:**
-- Check firewall rules (ICMP must be allowed)
-- Some routers may filter/deprioritize ICMP
-- Increase timeout value if needed
-
-**NetBox lookup failures:**
-- Verify NetBox URL and token
-- Check API token has required permissions
-- Ensure IP addresses are documented in NetBox IPAM
