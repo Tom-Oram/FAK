@@ -218,7 +218,7 @@ export default function PathTracer() {
       setSelectedCandidate(null);
       startTrace();
     }
-  }, [selectedCandidate, startDevice]);
+  }, [selectedCandidate, isTracing, startTrace]);
 
   const getHopColor = (hop: ICMPHop | DeviceHop) => {
     // For ICMP hops, use RTT
@@ -511,7 +511,7 @@ export default function PathTracer() {
                     </p>
                     {traceResult.candidates.map((candidate) => (
                       <button
-                        key={`${candidate.hostname}-${candidate.site}`}
+                        key={`${candidate.hostname}-${candidate.management_ip}`}
                         onClick={() => handleSelectCandidate(candidate)}
                         className="w-full p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-left transition-colors"
                       >
@@ -543,6 +543,7 @@ export default function PathTracer() {
                         value={startDevice}
                         onChange={(e) => setStartDevice(e.target.value)}
                         placeholder="hostname"
+                        aria-label="Starting device hostname"
                         className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-lg placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       />
                       <button
