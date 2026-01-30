@@ -42,6 +42,8 @@ class PathStatus(Enum):
     LOOP_DETECTED = "loop_detected"
     BLACKHOLED = "blackholed"
     MAX_HOPS_EXCEEDED = "max_hops_exceeded"
+    NEEDS_INPUT = "needs_input"
+    AMBIGUOUS_HOP = "ambiguous_hop"
 
 
 @dataclass
@@ -50,6 +52,7 @@ class NetworkDevice:
     hostname: str
     management_ip: str
     vendor: str
+    site: Optional[str] = None          # New field - from inventory or NetBox
     device_type: str = "unknown"
     credentials_ref: str = "default"
     logical_contexts: List[str] = field(default_factory=lambda: ["global"])
@@ -124,6 +127,14 @@ class TracePath:
     def hop_count(self) -> int:
         """Return the number of hops."""
         return len(self.hops)
+
+
+@dataclass
+class ResolveResult:
+    """Result of resolving an IP to a device, with disambiguation status."""
+    device: Optional[NetworkDevice]
+    status: str  # resolved, resolved_by_site, not_found, ambiguous
+    candidates: List[NetworkDevice] = field(default_factory=list)
 
 
 @dataclass
