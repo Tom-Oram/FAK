@@ -269,7 +269,9 @@ class PathTracer:
                 if not route:
                     return HopQueryResult(route=None)
 
-                # Collect enrichment data
+                # Collect enrichment data — each sub-query is wrapped
+                # individually so failures set the field to None rather
+                # than aborting the entire trace.
                 egress_detail = None
                 ingress_detail = None
                 policy_result = None
@@ -277,9 +279,15 @@ class PathTracer:
 
                 # Get interface details
                 if route.outgoing_interface:
-                    egress_detail = driver.get_interface_detail(route.outgoing_interface)
+                    try:
+                        egress_detail = driver.get_interface_detail(route.outgoing_interface)
+                    except Exception as e:
+                        logger.warning(f"Failed to get egress interface detail for {route.outgoing_interface}: {e}")
                 if ingress_interface:
-                    ingress_detail = driver.get_interface_detail(ingress_interface)
+                    try:
+                        ingress_detail = driver.get_interface_detail(ingress_interface)
+                    except Exception as e:
+                        logger.warning(f"Failed to get ingress interface detail for {ingress_interface}: {e}")
 
                 # Firewall-specific enrichment
                 if self._is_firewall(device):
@@ -287,24 +295,36 @@ class PathTracer:
                     ingress_zone = None
                     egress_zone = None
                     if ingress_interface:
-                        ingress_zone = driver.get_zone_for_interface(ingress_interface)
+                        try:
+                            ingress_zone = driver.get_zone_for_interface(ingress_interface)
+                        except Exception as e:
+                            logger.warning(f"Failed to get ingress zone for {ingress_interface}: {e}")
                     if route.outgoing_interface:
-                        egress_zone = driver.get_zone_for_interface(route.outgoing_interface)
+                        try:
+                            egress_zone = driver.get_zone_for_interface(route.outgoing_interface)
+                        except Exception as e:
+                            logger.warning(f"Failed to get egress zone for {route.outgoing_interface}: {e}")
 
                     # Security policy lookup
                     if ingress_zone and egress_zone and source_ip:
-                        policy_result = driver.lookup_security_policy(
-                            source_ip, destination,
-                            protocol, destination_port,
-                            ingress_zone, egress_zone,
-                        )
+                        try:
+                            policy_result = driver.lookup_security_policy(
+                                source_ip, destination,
+                                protocol, destination_port,
+                                ingress_zone, egress_zone,
+                            )
+                        except Exception as e:
+                            logger.warning(f"Failed to lookup security policy on {device.hostname}: {e}")
 
                     # NAT lookup
                     if source_ip:
-                        nat_result = driver.lookup_nat(
-                            source_ip, destination,
-                            protocol, destination_port,
-                        )
+                        try:
+                            nat_result = driver.lookup_nat(
+                                source_ip, destination,
+                                protocol, destination_port,
+                            )
+                        except Exception as e:
+                            logger.warning(f"Failed to lookup NAT on {device.hostname}: {e}")
 
                 return HopQueryResult(
                     route=route,

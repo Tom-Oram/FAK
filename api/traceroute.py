@@ -166,6 +166,7 @@ def _serialize_hop(hop):
             'device_type': hop.device.device_type,
             'site': hop.device.site,
         },
+        'ingress_interface': hop.ingress_interface,
         'egress_interface': hop.egress_interface,
         'logical_context': hop.logical_context,
         'lookup_time_ms': hop.lookup_time_ms,

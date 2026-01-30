@@ -63,6 +63,7 @@ class TestHopSerialization:
         hop = PathHop(sequence=1, device=device)
 
         data = serialize_hop(hop)
+        assert data['ingress_interface'] is None
         assert data['ingress_detail'] is None
         assert data['egress_detail'] is None
         assert data['policy_result'] is None
