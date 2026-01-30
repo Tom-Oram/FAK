@@ -46,13 +46,21 @@ class PathStatus(Enum):
     AMBIGUOUS_HOP = "ambiguous_hop"
 
 
+class ResolveStatus(Enum):
+    """Status of resolving an IP to a device."""
+    RESOLVED = "resolved"
+    RESOLVED_BY_SITE = "resolved_by_site"
+    NOT_FOUND = "not_found"
+    AMBIGUOUS = "ambiguous"
+
+
 @dataclass
 class NetworkDevice:
     """Represents a network device."""
     hostname: str
     management_ip: str
     vendor: str
-    site: Optional[str] = None          # New field - from inventory or NetBox
+    site: Optional[str] = None          # From inventory or NetBox
     device_type: str = "unknown"
     credentials_ref: str = "default"
     logical_contexts: List[str] = field(default_factory=lambda: ["global"])
@@ -133,7 +141,7 @@ class TracePath:
 class ResolveResult:
     """Result of resolving an IP to a device, with disambiguation status."""
     device: Optional[NetworkDevice]
-    status: str  # resolved, resolved_by_site, not_found, ambiguous
+    status: ResolveStatus
     candidates: List[NetworkDevice] = field(default_factory=list)
 
 
