@@ -12,8 +12,10 @@ cp .env.example .env
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `VITE_API_URL` | `http://localhost:8080` | Backend API base URL |
-| `VITE_WS_URL` | `ws://localhost:8080/ws` | WebSocket endpoint |
+| `VITE_API_URL` | `http://localhost:8082` | iPerf backend API URL (dev mode only) |
+| `VITE_WS_URL` | `ws://localhost:8082/ws` | iPerf WebSocket endpoint (dev mode only) |
+
+> **Note:** In production (Docker Compose), the frontend is served by nginx which proxies API requests internally. These variables are only used during `npm run dev`.
 
 ### Backend Variables
 
@@ -31,6 +33,10 @@ cp .env.example .env
 | `NETBOX_URL` | - | NetBox instance URL |
 | `NETBOX_TOKEN` | - | NetBox API token |
 | `SCANOPY_URL` | - | Scanopy server URL |
+| `PATHTRACE_USER` | - | SSH username for device-based path tracing |
+| `PATHTRACE_PASS` | - | SSH password for device-based path tracing |
+| `PATHTRACE_SECRET` | - | Enable secret for Cisco devices |
+| `PATHTRACE_INVENTORY` | `inventory.yaml` | Path to device inventory YAML file |
 
 ## Feature Flags
 

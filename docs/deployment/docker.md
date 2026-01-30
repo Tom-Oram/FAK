@@ -28,6 +28,19 @@ NETBOX_TOKEN=your-token-here
 
 - `iperf-data`: Persistent storage for iPerf test history
 
+### Path Tracer Configuration
+
+For device-based path tracing, add credentials to `.env`:
+```bash
+PATHTRACE_USER=network_admin
+PATHTRACE_PASS=your_password
+PATHTRACE_SECRET=your_enable_secret
+```
+
+The device inventory and credentials files are mounted read-only from the host:
+- `./pathtracer/inventory.yaml` → `/app/pathtracer/inventory.yaml`
+- `./pathtracer/credentials.yaml` → `/app/pathtracer/credentials.yaml`
+
 ## Building Images
 
 ```bash
