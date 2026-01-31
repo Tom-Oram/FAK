@@ -13,12 +13,12 @@ const iconMap = {
 }
 
 const colorMap = {
-  pcap: 'text-blue-500 bg-blue-100 dark:bg-blue-900/50',
-  dns: 'text-green-500 bg-green-100 dark:bg-green-900/50',
-  ssl: 'text-purple-500 bg-purple-100 dark:bg-purple-900/50',
-  path: 'text-orange-500 bg-orange-100 dark:bg-orange-900/50',
-  iperf: 'text-cyan-500 bg-cyan-100 dark:bg-cyan-900/50',
-  capture: 'text-pink-500 bg-pink-100 dark:bg-pink-900/50',
+  pcap: 'text-violet-500 bg-violet-100 dark:bg-violet-900/30',
+  dns: 'text-emerald-500 bg-emerald-100 dark:bg-emerald-900/30',
+  ssl: 'text-fuchsia-500 bg-fuchsia-100 dark:bg-fuchsia-900/30',
+  path: 'text-amber-500 bg-amber-100 dark:bg-amber-900/30',
+  iperf: 'text-teal-400 bg-teal-100 dark:bg-teal-900/30',
+  capture: 'text-pink-500 bg-pink-100 dark:bg-pink-900/30',
 }
 
 export default function RecentActivity() {
@@ -31,7 +31,7 @@ export default function RecentActivity() {
           <h3 className="font-semibold text-slate-900 dark:text-white">Recent Activity</h3>
         </div>
         <div className="card-body flex flex-col items-center justify-center py-12 text-center">
-          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+          <div className="w-12 h-12 rounded-full bg-purple-100/50 dark:bg-surface-2 flex items-center justify-center mb-3">
             <FileSearch className="w-6 h-6 text-slate-400" />
           </div>
           <p className="text-slate-600 dark:text-slate-400 text-sm">No recent activity</p>
@@ -55,7 +55,7 @@ export default function RecentActivity() {
         </button>
       </div>
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+        <div className="divide-y divide-purple-100/50 dark:divide-purple-500/10">
           {activity.map((item, index) => (
             <ActivityRow key={item.id} item={item} isNew={index === 0} />
           ))}
