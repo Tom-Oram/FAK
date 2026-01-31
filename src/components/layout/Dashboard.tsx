@@ -20,7 +20,7 @@ const tools = [
     href: '/pcap-analyzer',
     icon: FileSearch,
     subtitle: 'pcap & pcapng • Pattern detection',
-    color: 'from-blue-500 to-blue-600',
+    color: 'from-violet-500 to-indigo-600',
   },
   {
     name: 'DNS Lookup',
@@ -28,7 +28,7 @@ const tools = [
     href: '/dns-lookup',
     icon: Globe,
     subtitle: '10 record types • 3 resolvers',
-    color: 'from-green-500 to-green-600',
+    color: 'from-emerald-500 to-teal-600',
   },
   {
     name: 'SSL Checker',
@@ -36,7 +36,7 @@ const tools = [
     href: '/ssl-checker',
     icon: ShieldCheck,
     subtitle: 'CT log query • Chain validation',
-    color: 'from-purple-500 to-purple-600',
+    color: 'from-fuchsia-500 to-purple-600',
   },
   {
     name: 'Path Tracer',
@@ -44,7 +44,7 @@ const tools = [
     href: '/path-tracer',
     icon: Route,
     subtitle: 'RTT analysis • Device lookup',
-    color: 'from-orange-500 to-orange-600',
+    color: 'from-amber-500 to-rose-600',
   },
   {
     name: 'iPerf Server',
@@ -52,7 +52,7 @@ const tools = [
     href: '/iperf-server',
     icon: Gauge,
     subtitle: 'Live graphs • WebSocket updates',
-    color: 'from-cyan-500 to-cyan-600',
+    color: 'from-teal-400 to-cyan-600',
   },
   {
     name: 'Capture Builder',
@@ -60,7 +60,7 @@ const tools = [
     href: '/capture-builder',
     icon: Terminal,
     subtitle: 'Multi-platform • Visual builder',
-    color: 'from-pink-500 to-pink-600',
+    color: 'from-pink-500 to-fuchsia-600',
   },
 ]
 
@@ -71,7 +71,7 @@ export default function Dashboard() {
       <SystemHealthBar />
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 dark:from-slate-800 dark:to-slate-900 dark:border dark:border-primary-500/20 p-6 lg:p-8">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 dark:from-surface-1 dark:to-surface-base dark:border dark:border-primary-500/20 p-6 lg:p-8">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-10">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -91,14 +91,14 @@ export default function Dashboard() {
                 First Aid Kit
                 <span className="text-sm font-normal bg-white/20 px-2 py-0.5 rounded-full">v1.0</span>
               </h1>
-              <p className="mt-2 text-primary-100 dark:text-slate-300 max-w-xl">
+              <p className="mt-2 text-primary-100 dark:text-purple-200/70 max-w-xl">
                 Your first port of call for network incident diagnostics. Analyze captures, trace paths, test bandwidth, and more.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/pcap-analyzer"
-                className="btn bg-white text-primary-700 hover:bg-primary-50 shadow-lg shadow-primary-900/20"
+                className="btn bg-white text-primary-700 hover:bg-primary-50 shadow-lg shadow-primary-900/30"
               >
                 <FileSearch className="w-4 h-4 mr-2" />
                 Analyze PCAP
@@ -126,8 +126,8 @@ export default function Dashboard() {
               <Link
                 key={tool.name}
                 to={tool.href}
-                className="card card-hover group"
-                style={{ animationDelay: `${index * 50}ms` }}
+                className="card card-hover group stagger-item"
+                style={{ animationDelay: `${index * 60}ms` }}
               >
                 <div className="p-4">
                   <div className="flex items-start gap-4">
