@@ -8,44 +8,59 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 font-sans;
-    @apply dark:bg-slate-950 dark:text-slate-100;
+    @apply bg-[#faf8ff] text-slate-900 font-sans;
+    @apply dark:bg-surface-base dark:text-slate-100;
   }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
     @apply active:scale-[0.98];
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
-    @apply hover:shadow-lg hover:shadow-primary-500/25;
+    @apply btn bg-primary-600 text-white hover:bg-primary-700;
+    @apply hover:shadow-[0_0_20px_rgba(168,85,247,0.3),0_4px_12px_rgba(168,85,247,0.15)];
+    @apply focus-visible:shadow-[0_0_0_2px_rgba(168,85,247,0.5),0_0_12px_rgba(168,85,247,0.2)];
   }
 
   .btn-secondary {
-    @apply btn bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus:ring-primary-500;
-    @apply dark:bg-slate-700 dark:text-slate-100 dark:border-slate-600 dark:hover:bg-slate-600;
+    @apply btn bg-white text-slate-700 border border-purple-200/50 hover:bg-purple-50/50 hover:border-purple-300/50;
+    @apply dark:bg-surface-1 dark:text-slate-100 dark:border-purple-500/10 dark:hover:bg-surface-2 dark:hover:border-purple-500/20;
+    @apply focus-visible:shadow-[0_0_0_2px_rgba(168,85,247,0.5),0_0_12px_rgba(168,85,247,0.2)];
   }
 
   .btn-danger {
-    @apply btn bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500;
+    @apply btn bg-danger-600 text-white hover:bg-danger-700;
+    @apply focus-visible:shadow-[0_0_0_2px_rgba(239,68,68,0.5),0_0_12px_rgba(239,68,68,0.2)];
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-slate-200;
-    @apply dark:bg-slate-900 dark:border-slate-800;
+    @apply bg-white rounded-xl shadow-sm border border-purple-200/50 shadow-purple-500/[0.03];
+    @apply dark:bg-surface-1 dark:border-purple-500/10;
     @apply transition-all duration-200;
   }
 
   .card-hover {
-    @apply hover:shadow-md hover:border-slate-300 hover:-translate-y-0.5;
-    @apply dark:hover:border-slate-700 dark:hover:shadow-slate-900/50;
+    @apply cursor-pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.2s ease,
+                border-color 0.2s ease;
+  }
+
+  .card-hover:hover {
+    @apply -translate-y-0.5 border-purple-400/20;
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.08), 0 0 30px rgba(168, 85, 247, 0.05);
+  }
+
+  .dark .card-hover:hover {
+    @apply border-purple-500/20;
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.12), 0 0 30px rgba(168, 85, 247, 0.08);
   }
 
   .card-header {
-    @apply px-6 py-4 border-b border-slate-200 dark:border-slate-800;
+    @apply px-6 py-4 border-b border-purple-200/50 dark:border-purple-500/10;
   }
 
   .card-body {
@@ -81,17 +96,17 @@
   }
 
   .input {
-    @apply px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-900;
-    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
-    @apply dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100;
+    @apply px-3 py-2 rounded-lg border border-purple-200/50 bg-white text-slate-900;
+    @apply focus:outline-none focus-visible:shadow-[0_0_0_2px_rgba(168,85,247,0.5),0_0_12px_rgba(168,85,247,0.2)] focus:border-primary-500;
+    @apply dark:bg-surface-1 dark:border-purple-500/10 dark:text-slate-100;
     @apply placeholder:text-slate-400 dark:placeholder:text-slate-500;
   }
 
   /* Select dropdown styling */
   .select {
-    @apply px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-900;
-    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
-    @apply dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100;
+    @apply px-3 py-2 rounded-lg border border-purple-200/50 bg-white text-slate-900;
+    @apply focus:outline-none focus-visible:shadow-[0_0_0_2px_rgba(168,85,247,0.5),0_0_12px_rgba(168,85,247,0.2)] focus:border-primary-500;
+    @apply dark:bg-surface-1 dark:border-purple-500/10 dark:text-slate-100;
   }
 
   /* Option toggle buttons (like timestamp format) */
@@ -104,8 +119,8 @@
   }
 
   .btn-toggle-inactive {
-    @apply btn-toggle bg-white text-slate-700 border-slate-300 hover:bg-slate-50;
-    @apply dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700;
+    @apply btn-toggle bg-white text-slate-700 border-purple-200/50 hover:bg-purple-50/50;
+    @apply dark:bg-surface-1 dark:text-slate-300 dark:border-purple-500/10 dark:hover:bg-surface-2;
   }
 }
 
@@ -120,15 +135,15 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
-    @apply bg-slate-100 rounded dark:bg-slate-800;
+    @apply bg-purple-100/50 rounded dark:bg-surface-2;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 rounded hover:bg-slate-400 dark:bg-slate-600 dark:hover:bg-slate-500;
+    @apply bg-purple-300/50 rounded hover:bg-purple-400/50 dark:bg-purple-500/20 dark:hover:bg-purple-500/30;
   }
 
   .glass {
-    @apply bg-white/80 backdrop-blur-sm dark:bg-slate-900/80;
+    @apply bg-white/80 backdrop-blur-xl dark:bg-surface-base/80;
   }
 }
 
@@ -146,6 +161,23 @@
   animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Page entrance animation */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-page-enter {
+  animation: page-enter 0.3s ease-out forwards;
+}
+
+/* Legacy fade-in (kept for backwards compat) */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -176,10 +208,91 @@
   animation: slide-in-right 0.2s ease-out;
 }
 
+/* Staggered list entrance */
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-item {
+  opacity: 0;
+  animation: stagger-in 0.3s ease-out forwards;
+}
+
+/* Button glow pulse on click */
+@keyframes glow-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(168, 85, 247, 0);
+  }
+}
+
+.btn-primary:active {
+  animation: glow-pulse 0.4s ease-out;
+}
+
+/* Skeleton shimmer for loading states */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.05) 25%, rgba(168, 85, 247, 0.1) 50%, rgba(168, 85, 247, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, #140b24 25%, #2a1a44 50%, #140b24 75%);
+  background-size: 200% 100%;
+}
+
+/* Status ring pulse */
+@keyframes ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Route transition */
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.route-transition {
+  animation: route-enter 0.25s ease-out;
+}
+
 /* Drop zone styling */
 .drop-zone {
-  @apply border-2 border-dashed border-slate-300 rounded-xl transition-all duration-200;
-  @apply dark:border-slate-700;
+  @apply border-2 border-dashed border-purple-300/50 rounded-xl transition-all duration-200;
+  @apply dark:border-purple-500/20;
 }
 
 .drop-zone:hover,
