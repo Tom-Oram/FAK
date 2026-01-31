@@ -1,244 +1,280 @@
 package iperf
 
 import (
-	"encoding/json"
-	"math"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Tom-Oram/fak/backend/internal/models"
 )
 
-// iperf3 JSON output structures - these match iperf3 JSON output format
+// ParseEvent represents the type of event produced by parsing a line.
+type ParseEvent int
 
-// Iperf3Output represents the complete JSON output from iperf3
-type Iperf3Output struct {
-	Start     Iperf3Start      `json:"start"`
-	Intervals []Iperf3Interval `json:"intervals"`
-	End       Iperf3End        `json:"end"`
-	Error     string           `json:"error,omitempty"`
+const (
+	EventNone            ParseEvent = iota
+	EventClientConnected            // "Accepted connection from ..."
+	EventBandwidthUpdate            // per-interval bandwidth line
+	EventTestComplete               // summary sender/receiver line
+	EventError                      // iperf3 error line
+)
+
+// ParseResult is the output of parsing a single line.
+type ParseResult struct {
+	Event           ParseEvent
+	ConnectionEvent *models.ConnectionEvent
+	BandwidthUpdate *models.BandwidthUpdate
+	TestResult      *models.TestResult
+	ErrorMessage    string
 }
 
-// Iperf3Start contains information about the test start
-type Iperf3Start struct {
-	Connected []Iperf3Connected `json:"connected"`
-	Timestamp Iperf3Timestamp   `json:"timestamp"`
-	TestStart Iperf3TestStart   `json:"test_start"`
+// TextParser parses iperf3 text (non-JSON) stdout line-by-line.
+type TextParser struct {
+	// compiled regex patterns
+	reAccepted    *regexp.Regexp
+	reConnectedTo *regexp.Regexp
+	reUDPHeader   *regexp.Regexp
+	reSeparator   *regexp.Regexp
+	reInterval    *regexp.Regexp
+	reSummary     *regexp.Regexp
+	reListening   *regexp.Regexp
+
+	// per-test session state
+	clientIP     string
+	clientPort   int
+	protocol     models.Protocol
+	inSummary    bool
+	minBandwidth float64
+	maxBandwidth float64
+	intervals    int
 }
 
-// Iperf3Connected contains connection details
-type Iperf3Connected struct {
-	Socket     int    `json:"socket"`
-	LocalHost  string `json:"local_host"`
-	LocalPort  int    `json:"local_port"`
-	RemoteHost string `json:"remote_host"`
-	RemotePort int    `json:"remote_port"`
-}
+// NewTextParser creates a TextParser with compiled regex patterns.
+func NewTextParser() *TextParser {
+	return &TextParser{
+		// "Accepted connection from 10.0.0.1, port 54321"
+		reAccepted: regexp.MustCompile(
+			`Accepted connection from ([^,]+), port (\d+)`),
 
-// Iperf3Timestamp contains timing information
-type Iperf3Timestamp struct {
-	Time     string `json:"time"`
-	Timesecs int64  `json:"timesecs"`
-}
+		// "[  5] local 10.0.0.2 port 5201 connected to 10.0.0.1 port 54321"
+		reConnectedTo: regexp.MustCompile(
+			`\[\s*\d+\]\s+local\s+\S+\s+port\s+\d+\s+connected to\s+(\S+)\s+port\s+(\d+)`),
 
-// Iperf3TestStart contains test configuration details
-type Iperf3TestStart struct {
-	Protocol   string `json:"protocol"`
-	NumStreams int    `json:"num_streams"`
-	BlkSize    int    `json:"blksize"`
-	Duration   int    `json:"duration"`
-	Reverse    int    `json:"reverse"`
-}
+		// "[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams"
+		reUDPHeader: regexp.MustCompile(
+			`\[\s*ID\].*Jitter.*Lost/Total`),
 
-// Iperf3Interval contains data for a single measurement interval
-type Iperf3Interval struct {
-	Streams []Iperf3Stream `json:"streams"`
-	Sum     Iperf3Sum      `json:"sum"`
-}
+		// "- - - - - - - - - - - - -"
+		reSeparator: regexp.MustCompile(
+			`^-\s+-\s+-\s+-\s+-`),
 
-// Iperf3Stream contains per-stream interval data
-type Iperf3Stream struct {
-	Socket        int     `json:"socket"`
-	Start         float64 `json:"start"`
-	End           float64 `json:"end"`
-	Seconds       float64 `json:"seconds"`
-	Bytes         int64   `json:"bytes"`
-	BitsPerSecond float64 `json:"bits_per_second"`
-	Retransmits   int     `json:"retransmits"`
-	Omitted       bool    `json:"omitted"`
-}
+		// "[  5]   0.00-1.00   sec  2.47 GBytes  21.2 Gbits/sec"
+		// "[  5]   0.00-1.00   sec  1.25 MBytes  10.5 Mbits/sec  0.123 ms  0/856 (0%)"
+		reInterval: regexp.MustCompile(
+			`\[\s*\d+\]\s+([\d.]+)-([\d.]+)\s+sec\s+([\d.]+)\s+(\S?Bytes)\s+([\d.]+)\s+(\S?bits/sec)(?:\s+([\d.]+)\s+ms\s+(\d+)/(\d+)\s+\(([\d.]+)%\))?`),
 
-// Iperf3Sum contains summary data for an interval
-type Iperf3Sum struct {
-	Start         float64 `json:"start"`
-	End           float64 `json:"end"`
-	Seconds       float64 `json:"seconds"`
-	Bytes         int64   `json:"bytes"`
-	BitsPerSecond float64 `json:"bits_per_second"`
-	Retransmits   int     `json:"retransmits"`
-	Omitted       bool    `json:"omitted"`
-}
+		// Same as interval but with sender/receiver suffix
+		reSummary: regexp.MustCompile(
+			`\[\s*\d+\]\s+([\d.]+)-([\d.]+)\s+sec\s+([\d.]+)\s+(\S?Bytes)\s+([\d.]+)\s+(\S?bits/sec)(?:\s+([\d.]+)\s+ms\s+(\d+)/(\d+)\s+\(([\d.]+)%\))?\s+(sender|receiver)`),
 
-// Iperf3End contains the final test results
-type Iperf3End struct {
-	Streams        []Iperf3EndStream `json:"streams"`
-	SumSent        Iperf3SumStats    `json:"sum_sent"`
-	SumReceived    Iperf3SumStats    `json:"sum_received"`
-	CPUUtilization Iperf3CPU         `json:"cpu_utilization_percent"`
-}
+		// "Server listening on 5201 (test #2)"  or  "Server listening on 5201"
+		reListening: regexp.MustCompile(
+			`Server listening on (\d+)`),
 
-// Iperf3EndStream contains per-stream final results
-type Iperf3EndStream struct {
-	Sender   Iperf3SumStats `json:"sender"`
-	Receiver Iperf3SumStats `json:"receiver"`
-}
-
-// Iperf3SumStats contains summary statistics
-type Iperf3SumStats struct {
-	Start         float64 `json:"start"`
-	End           float64 `json:"end"`
-	Seconds       float64 `json:"seconds"`
-	Bytes         int64   `json:"bytes"`
-	BitsPerSecond float64 `json:"bits_per_second"`
-	Retransmits   int     `json:"retransmits"`
-	Jitter        float64 `json:"jitter_ms"`
-	LostPackets   int     `json:"lost_packets"`
-	Packets       int     `json:"packets"`
-	LostPercent   float64 `json:"lost_percent"`
-}
-
-// Iperf3CPU contains CPU utilization data
-type Iperf3CPU struct {
-	HostTotal    float64 `json:"host_total"`
-	HostUser     float64 `json:"host_user"`
-	HostSystem   float64 `json:"host_system"`
-	RemoteTotal  float64 `json:"remote_total"`
-	RemoteUser   float64 `json:"remote_user"`
-	RemoteSystem float64 `json:"remote_system"`
-}
-
-// ParseOutput parses iperf3 JSON output into an Iperf3Output struct
-func ParseOutput(data []byte) (*Iperf3Output, error) {
-	var output Iperf3Output
-	if err := json.Unmarshal(data, &output); err != nil {
-		return nil, err
-	}
-	return &output, nil
-}
-
-// ExtractBandwidthUpdate extracts a BandwidthUpdate from an interval
-func ExtractBandwidthUpdate(interval Iperf3Interval) models.BandwidthUpdate {
-	return models.BandwidthUpdate{
-		Timestamp:     time.Now(),
-		IntervalStart: interval.Sum.Start,
-		IntervalEnd:   interval.Sum.End,
-		Bytes:         interval.Sum.Bytes,
-		BitsPerSecond: interval.Sum.BitsPerSecond,
+		protocol: models.ProtocolTCP,
 	}
 }
 
-// ExtractTestResult extracts a TestResult from complete iperf3 output
-func ExtractTestResult(output *Iperf3Output) *models.TestResult {
-	if output == nil {
-		return nil
+// ParseLine parses a single line of iperf3 text output and returns a result.
+func (p *TextParser) ParseLine(line string) ParseResult {
+	line = strings.TrimRight(line, "\r\n")
+
+	// Check for summary line first (has sender/receiver suffix)
+	if m := p.reSummary.FindStringSubmatch(line); m != nil && p.inSummary {
+		return p.buildTestComplete(m)
 	}
 
-	result := &models.TestResult{
-		Timestamp: time.Now(),
-	}
-
-	// Extract client info from connected
-	if len(output.Start.Connected) > 0 {
-		conn := output.Start.Connected[0]
-		result.ClientIP = conn.RemoteHost
-		result.ClientPort = conn.RemotePort
-	}
-
-	// Determine protocol
-	protocol := output.Start.TestStart.Protocol
-	if protocol == "UDP" {
-		result.Protocol = models.ProtocolUDP
-	} else {
-		result.Protocol = models.ProtocolTCP
-	}
-
-	// Determine direction: reverse=1 means download (client receives), otherwise upload
-	if output.Start.TestStart.Reverse == 1 {
-		result.Direction = "download"
-	} else {
-		result.Direction = "upload"
-	}
-
-	// Choose the appropriate stats based on direction
-	// For upload: use SumReceived (what the server received)
-	// For download: use SumSent (what the server sent)
-	var stats Iperf3SumStats
-	if result.Direction == "upload" {
-		stats = output.End.SumReceived
-	} else {
-		stats = output.End.SumSent
-	}
-
-	result.Duration = stats.Seconds
-	result.BytesTransferred = stats.Bytes
-	result.AvgBandwidth = stats.BitsPerSecond
-
-	// Calculate min/max bandwidth from intervals
-	minBandwidth := math.MaxFloat64
-	maxBandwidth := 0.0
-
-	for _, interval := range output.Intervals {
-		if !interval.Sum.Omitted {
-			bps := interval.Sum.BitsPerSecond
-			if bps < minBandwidth {
-				minBandwidth = bps
-			}
-			if bps > maxBandwidth {
-				maxBandwidth = bps
-			}
+	// "Accepted connection from ..."
+	if m := p.reAccepted.FindStringSubmatch(line); m != nil {
+		ip := m[1]
+		return ParseResult{
+			Event: EventClientConnected,
+			ConnectionEvent: &models.ConnectionEvent{
+				Timestamp: time.Now(),
+				ClientIP:  ip,
+				EventType: "connected",
+			},
 		}
 	}
 
-	// Handle case with no intervals
-	if minBandwidth == math.MaxFloat64 {
-		minBandwidth = stats.BitsPerSecond
-	}
-	if maxBandwidth == 0.0 {
-		maxBandwidth = stats.BitsPerSecond
-	}
-
-	result.MinBandwidth = minBandwidth
-	result.MaxBandwidth = maxBandwidth
-
-	// Include TCP-specific metrics
-	if result.Protocol == models.ProtocolTCP {
-		retransmits := stats.Retransmits
-		result.Retransmits = &retransmits
+	// "connected to <IP> port <PORT>" — updates parser state
+	if m := p.reConnectedTo.FindStringSubmatch(line); m != nil {
+		p.clientIP = m[1]
+		p.clientPort, _ = strconv.Atoi(m[2])
+		return ParseResult{Event: EventNone}
 	}
 
-	// Include UDP-specific metrics
-	if result.Protocol == models.ProtocolUDP {
-		jitter := stats.Jitter
-		result.Jitter = &jitter
-
-		packetLoss := stats.LostPercent
-		result.PacketLoss = &packetLoss
+	// UDP header detection
+	if p.reUDPHeader.MatchString(line) {
+		p.protocol = models.ProtocolUDP
+		return ParseResult{Event: EventNone}
 	}
 
-	return result
+	// Separator marks start of summary section
+	if p.reSeparator.MatchString(line) {
+		p.inSummary = true
+		return ParseResult{Event: EventNone}
+	}
+
+	// Server listening — reset session state for next test
+	if p.reListening.MatchString(line) {
+		p.resetSession()
+		return ParseResult{Event: EventNone}
+	}
+
+	// Interval line (not in summary)
+	if m := p.reInterval.FindStringSubmatch(line); m != nil && !p.inSummary {
+		return p.buildBandwidthUpdate(m)
+	}
+
+	return ParseResult{Event: EventNone}
 }
 
-// ExtractConnectionEvent creates a ConnectionEvent from iperf3 start output
-func ExtractConnectionEvent(output *Iperf3Output) *models.ConnectionEvent {
-	if output == nil || len(output.Start.Connected) == 0 {
-		return nil
+// buildBandwidthUpdate creates a BandwidthUpdate from an interval regex match.
+func (p *TextParser) buildBandwidthUpdate(m []string) ParseResult {
+	start, _ := strconv.ParseFloat(m[1], 64)
+	end, _ := strconv.ParseFloat(m[2], 64)
+	transferVal, _ := strconv.ParseFloat(m[3], 64)
+	transferUnit := m[4]
+	bitrateVal, _ := strconv.ParseFloat(m[5], 64)
+	bitrateUnit := m[6]
+
+	bytes := int64(convertBytes(transferVal, transferUnit))
+	bps := convertBitrate(bitrateVal, bitrateUnit)
+
+	// Track min/max for test complete
+	if p.intervals == 0 {
+		p.minBandwidth = bps
+		p.maxBandwidth = bps
+	} else {
+		if bps < p.minBandwidth {
+			p.minBandwidth = bps
+		}
+		if bps > p.maxBandwidth {
+			p.maxBandwidth = bps
+		}
+	}
+	p.intervals++
+
+	return ParseResult{
+		Event: EventBandwidthUpdate,
+		BandwidthUpdate: &models.BandwidthUpdate{
+			Timestamp:     time.Now(),
+			IntervalStart: start,
+			IntervalEnd:   end,
+			Bytes:         bytes,
+			BitsPerSecond: bps,
+		},
+	}
+}
+
+// buildTestComplete creates a TestResult from a summary regex match.
+func (p *TextParser) buildTestComplete(m []string) ParseResult {
+	start, _ := strconv.ParseFloat(m[1], 64)
+	end, _ := strconv.ParseFloat(m[2], 64)
+	transferVal, _ := strconv.ParseFloat(m[3], 64)
+	transferUnit := m[4]
+	bitrateVal, _ := strconv.ParseFloat(m[5], 64)
+	bitrateUnit := m[6]
+
+	bytes := int64(convertBytes(transferVal, transferUnit))
+	bps := convertBitrate(bitrateVal, bitrateUnit)
+	duration := end - start
+
+	// Direction: on the server side, "receiver" = upload, "sender" = download
+	role := m[11]
+	direction := "upload"
+	if role == "sender" {
+		direction = "download"
 	}
 
-	conn := output.Start.Connected[0]
+	result := &models.TestResult{
+		Timestamp:        time.Now(),
+		ClientIP:         p.clientIP,
+		ClientPort:       p.clientPort,
+		Protocol:         p.protocol,
+		Duration:         duration,
+		BytesTransferred: bytes,
+		AvgBandwidth:     bps,
+		Direction:        direction,
+	}
 
-	return &models.ConnectionEvent{
-		Timestamp: time.Now(),
-		ClientIP:  conn.RemoteHost,
-		EventType: "connected",
-		Details:   "",
+	// Min/max from tracked intervals
+	if p.intervals > 0 {
+		result.MinBandwidth = p.minBandwidth
+		result.MaxBandwidth = p.maxBandwidth
+	} else {
+		result.MinBandwidth = bps
+		result.MaxBandwidth = bps
+	}
+
+	// UDP-specific fields
+	if p.protocol == models.ProtocolUDP && m[7] != "" {
+		jitter, _ := strconv.ParseFloat(m[7], 64)
+		result.Jitter = &jitter
+
+		lost, _ := strconv.Atoi(m[8])
+		total, _ := strconv.Atoi(m[9])
+		lostPct, _ := strconv.ParseFloat(m[10], 64)
+		_ = lost
+		_ = total
+		result.PacketLoss = &lostPct
+	}
+
+	return ParseResult{
+		Event:      EventTestComplete,
+		TestResult: result,
+	}
+}
+
+// resetSession clears per-test state for the next test session.
+func (p *TextParser) resetSession() {
+	p.clientIP = ""
+	p.clientPort = 0
+	p.protocol = models.ProtocolTCP
+	p.inSummary = false
+	p.minBandwidth = 0
+	p.maxBandwidth = 0
+	p.intervals = 0
+}
+
+// convertBytes converts a transfer value with unit to bytes.
+// iperf3 uses binary prefixes: 1 GBytes = 1024^3, 1 MBytes = 1024^2, etc.
+func convertBytes(value float64, unit string) float64 {
+	switch {
+	case strings.HasPrefix(unit, "G"):
+		return value * 1024 * 1024 * 1024
+	case strings.HasPrefix(unit, "M"):
+		return value * 1024 * 1024
+	case strings.HasPrefix(unit, "K"):
+		return value * 1024
+	default:
+		return value
+	}
+}
+
+// convertBitrate converts a bitrate value with unit to bits/sec.
+// iperf3 uses decimal prefixes: 1 Gbits/sec = 1e9, 1 Mbits/sec = 1e6, etc.
+func convertBitrate(value float64, unit string) float64 {
+	switch {
+	case strings.HasPrefix(unit, "G"):
+		return value * 1e9
+	case strings.HasPrefix(unit, "M"):
+		return value * 1e6
+	case strings.HasPrefix(unit, "K"):
+		return value * 1e3
+	default:
+		return value
 	}
 }

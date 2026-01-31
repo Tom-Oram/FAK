@@ -78,7 +78,7 @@ func isValidIPOrCIDR(s string) bool {
 func BuildArgs(cfg models.ServerConfig) []string {
 	args := []string{
 		"-s",                          // server mode
-		"-J",                          // JSON output
+		"--forceflush",                // flush output per line
 		"-p", strconv.Itoa(cfg.Port), // port
 	}
 

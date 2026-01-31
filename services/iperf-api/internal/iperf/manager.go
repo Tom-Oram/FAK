@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 
@@ -81,6 +82,13 @@ func (m *Manager) Start(cfg models.ServerConfig) error {
 		return fmt.Errorf("failed to get stdout pipe: %w", err)
 	}
 
+	// Get stderr pipe
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		cancel()
+		return fmt.Errorf("failed to get stderr pipe: %w", err)
+	}
+
 	// Start process
 	if err := cmd.Start(); err != nil {
 		cancel()
@@ -93,6 +101,9 @@ func (m *Manager) Start(cfg models.ServerConfig) error {
 
 	// Start parseOutput goroutine
 	go m.parseOutput(stdout)
+
+	// Start readStderr goroutine
+	go m.readStderr(stderr)
 
 	// Start monitorProcess goroutine
 	go m.monitorProcess()
@@ -136,103 +147,65 @@ func (m *Manager) Stop() error {
 	return nil
 }
 
-// parseOutput reads and parses the iperf3 JSON output from stdout
+// parseOutput reads iperf3 text output line-by-line and dispatches events.
 func (m *Manager) parseOutput(stdout io.ReadCloser) {
 	defer stdout.Close()
 
-	// Use bufio.Scanner with large buffer
+	parser := NewTextParser()
 	scanner := bufio.NewScanner(stdout)
-	buf := make([]byte, 0, 64*1024)
-	scanner.Buffer(buf, 1024*1024) // 1MB max buffer
-
-	var jsonBuf []byte
-	braceCount := 0
 
 	for scanner.Scan() {
-		line := scanner.Bytes()
+		line := scanner.Text()
 
-		// Count braces to detect complete JSON objects
-		for _, b := range line {
-			if b == '{' {
-				braceCount++
-			} else if b == '}' {
-				braceCount--
+		// Reset idle timer on any output
+		m.resetIdleTimer()
+
+		result := parser.ParseLine(line)
+
+		switch result.Event {
+		case EventClientConnected:
+			// Check allowlist
+			m.mu.RLock()
+			allowlist := m.config.Allowlist
+			m.mu.RUnlock()
+
+			if !IsClientAllowed(result.ConnectionEvent.ClientIP, allowlist) {
+				m.sendError(fmt.Sprintf("client %s not in allowlist", result.ConnectionEvent.ClientIP))
+				continue
 			}
+
+			m.sendEvent(models.WSMessage{
+				Type:    models.WSMessageTypeClientConnected,
+				Payload: result.ConnectionEvent,
+			})
+
+		case EventBandwidthUpdate:
+			m.sendEvent(models.WSMessage{
+				Type:    models.WSMessageTypeBandwidthUpdate,
+				Payload: result.BandwidthUpdate,
+			})
+
+		case EventTestComplete:
+			m.sendEvent(models.WSMessage{
+				Type:    models.WSMessageTypeTestComplete,
+				Payload: result.TestResult,
+			})
+
+		case EventError:
+			m.sendError(result.ErrorMessage)
 		}
-
-		jsonBuf = append(jsonBuf, line...)
-		jsonBuf = append(jsonBuf, '\n')
-
-		// When braces balance, call processJSON
-		if braceCount == 0 && len(jsonBuf) > 0 {
-			m.processJSON(jsonBuf)
-			jsonBuf = nil
-		}
-	}
-
-	// Process any remaining data
-	if len(jsonBuf) > 0 {
-		m.processJSON(jsonBuf)
 	}
 }
 
-// processJSON processes a complete JSON object from iperf3 output
-func (m *Manager) processJSON(data []byte) {
-	// Reset idle timer on any activity
-	m.resetIdleTimer()
+// readStderr reads stderr lines and sends them as error messages.
+func (m *Manager) readStderr(stderr io.ReadCloser) {
+	defer stderr.Close()
 
-	// Parse output
-	output, err := ParseOutput(data)
-	if err != nil {
-		m.sendError(fmt.Sprintf("failed to parse iperf3 output: %v", err))
-		return
-	}
-
-	// Check for iperf3 error message
-	if output.Error != "" {
-		m.sendError(fmt.Sprintf("iperf3 error: %s", output.Error))
-		return
-	}
-
-	// Check client allowlist
-	m.mu.RLock()
-	allowlist := m.config.Allowlist
-	m.mu.RUnlock()
-
-	if len(output.Start.Connected) > 0 {
-		clientIP := output.Start.Connected[0].RemoteHost
-		if !IsClientAllowed(clientIP, allowlist) {
-			m.sendError(fmt.Sprintf("client %s not in allowlist", clientIP))
-			return
-		}
-	}
-
-	// Send connection event
-	if connEvent := ExtractConnectionEvent(output); connEvent != nil {
-		m.sendEvent(models.WSMessage{
-			Type:    models.WSMessageTypeClientConnected,
-			Payload: connEvent,
-		})
-	}
-
-	// Send bandwidth updates for non-omitted intervals
-	for _, interval := range output.Intervals {
-		if !interval.Sum.Omitted {
-			update := ExtractBandwidthUpdate(interval)
-			m.sendEvent(models.WSMessage{
-				Type:    models.WSMessageTypeBandwidthUpdate,
-				Payload: update,
-			})
-		}
-	}
-
-	// Send test complete if end data present
-	if output.End.SumSent.Bytes > 0 || output.End.SumReceived.Bytes > 0 {
-		if result := ExtractTestResult(output); result != nil {
-			m.sendEvent(models.WSMessage{
-				Type:    models.WSMessageTypeTestComplete,
-				Payload: result,
-			})
+	scanner := bufio.NewScanner(stderr)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line != "" {
+			m.sendError(fmt.Sprintf("iperf3: %s", line))
 		}
 	}
 }
