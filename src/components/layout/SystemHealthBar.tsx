@@ -95,7 +95,7 @@ export default function SystemHealthBar() {
       case 'online': return 'bg-success-500'
       case 'offline': return 'bg-danger-500'
       case 'connecting': return 'bg-warning-500 animate-pulse'
-      default: return 'bg-slate-500'
+      default: return 'bg-purple-500'
     }
   }
 
@@ -107,7 +107,12 @@ export default function SystemHealthBar() {
           <div className="flex items-center gap-2 text-sm">
             <Icon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
             <span className="text-slate-700 dark:text-slate-300 font-medium">{service.name}</span>
-            <span className={`w-2 h-2 rounded-full ${getStatusColor(service.status)}`} />
+            <span className="relative flex h-2 w-2">
+              {service.status === 'online' && (
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75" />
+              )}
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${getStatusColor(service.status)}`} />
+            </span>
             {service.detail && (
               <span className="text-slate-500 dark:text-slate-400 text-xs">{service.detail}</span>
             )}

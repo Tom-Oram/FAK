@@ -67,7 +67,7 @@ export default function RecentActivity() {
 
 function ActivityRow({ item, isNew }: { item: ActivityItem; isNew: boolean }) {
   const Icon = iconMap[item.type] ?? FileSearch
-  const colors = colorMap[item.type] ?? 'text-slate-500 bg-slate-100 dark:bg-slate-800'
+  const colors = colorMap[item.type] ?? 'text-slate-500 bg-purple-100/50 dark:bg-surface-1'
 
   return (
     <div className={`px-4 py-3 flex items-start gap-3 ${isNew ? 'animate-slide-in-right' : ''}`}>

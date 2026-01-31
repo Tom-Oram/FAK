@@ -286,7 +286,7 @@
 }
 
 .route-transition {
-  animation: route-enter 0.25s ease-out;
+  animation: route-enter 0.2s ease-out;
 }
 
 /* Drop zone styling */
