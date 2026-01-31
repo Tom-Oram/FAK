@@ -100,7 +100,7 @@ export default function SystemHealthBar() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 px-4 py-2 bg-slate-100 dark:bg-slate-900 rounded-lg">
+    <div className="flex flex-wrap items-center gap-3 px-4 py-2 bg-purple-100/30 dark:bg-surface-1 rounded-lg">
       {services.map(service => {
         const Icon = getIcon(service.name)
         const content = (
@@ -119,7 +119,7 @@ export default function SystemHealthBar() {
             <Link
               key={service.name}
               to={service.href}
-              className="hover:bg-slate-200 dark:hover:bg-slate-800 px-2 py-1 -mx-2 -my-1 rounded transition-colors"
+              className="hover:bg-purple-200/30 dark:hover:bg-surface-2 px-2 py-1 -mx-2 -my-1 rounded transition-colors"
             >
               {content}
             </Link>
